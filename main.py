@@ -1,11 +1,12 @@
-from typing import Union
 from typing import List, Dict
-
 import httpx
 from fastapi import FastAPI, HTTPException
-
+from dotenv import load_dotenv
 import serpapi
+import os
+import xmltodict
 
+load_dotenv()
 
 class SearchResult:
     def __init__(self, version_control, link, description):
@@ -21,20 +22,49 @@ VERSION_CONTROLS = [
 ]
 
 SEARCH_ENGINES = [
-    'google',
-    'duckduckgo',
-    #'yandex'
+    # 'google',
+    # 'duckduckgo',
+    'yandex'
 ]
 
-
-API_KEY = "d4ef59d3ff953eae8e1187af50632f2069f72bd86733fc91f6db75dd86e626a1"
+API_KEY = os.getenv("SERP_API")
+YC_FOLDER = os.getenv("YC_FOLDER")
+YC_SECRET_KEY = os.getenv("YC_SECRET")
 
 
 app = FastAPI()
 
+async def yandex_search(query: str):
+    url = "https://yandex.ru/search/xml"
+    params = {
+        "folderid": YC_FOLDER,
+        "apikey": YC_SECRET_KEY,
+    }
+    results = []
+    async with httpx.AsyncClient() as client:
+        for vc in VERSION_CONTROLS:
+            params["query"] = query + " host:" + vc
+            response = await client.get(url, params=params)
+            data_dict = xmltodict.parse(response.text)
+            try:
+                _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
+            except KeyError:
+                print(data_dict)
+                _res = []
+            for result in _res:
+                doc = result["doc"]
+                results.append({
+                    "url": doc["url"],
+                    "title": doc["title"],
+                    "headline": doc.get("headline"),
+                })
+        
+    return results
+
 # Async function to fetch search results from an example API
 async def fetch_search_results(engine: str, query: str, search_language: str) -> List[Dict]:
-
+    if engine.lower() == "yandex":
+        return await yandex_search(query)
     params = {
         "q": query,
         "engine": engine,
@@ -74,11 +104,8 @@ async def search(query: str):
     RESULTS = {}    
     for engine in SEARCH_ENGINES:
         engine_results = {}
-        for version_control in VERSION_CONTROLS:
-            query = f"site:{version_control} '{query}'"
-            result = await fetch_search_results(engine = engine, query= query, search_language=search_language)
-            engine_results[version_control] = result
-        RESULTS[engine] = engine_results
+        result = await fetch_search_results(engine = engine, query= query, search_language=search_language)
+        RESULTS[engine] = result
 
     return RESULTS
 

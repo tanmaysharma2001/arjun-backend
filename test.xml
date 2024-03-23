@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<yandexsearch version="1.0">
+<request>
+<query>host:hub.mos.ru financial applications</query>
+<page>0</page>
+<sortby order="descending" priority="no">rlv</sortby>
+<maxpassages>1</maxpassages>
+<groupings>
+<groupby attr="d" mode="deep" groups-on-page="10" docs-in-group="1" curcateg="-1"/>
+</groupings>
+</request>
+<response date="20240323T171112">
+<reqid>1711213872403693-1438082251464487009-balancer-l7leveler-kubr-yp-vla-42-BAL</reqid>
+<found priority="phrase">5942</found>
+<found priority="strict">5942</found>
+<found priority="all">5942</found>
+<found-human>Нашлось 6 тыс. ответов</found-human>
+<results>
+<grouping attr="d" mode="deep" groups-on-page="10" docs-in-group="1" curcateg="-1">
+<page first="1" last="10">0</page>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z8A58FB01E8EFB050">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1711063424&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/mos/src/local-scanner-settings&amp;l10n=ru&amp;mime=html&amp;sign=79aca15269067dce20907823d2b999d5&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/mos/src/local-scanner-settings</url>
+<domain>hub.mos.ru</domain>
+<title>MOS / Исходные коды / local-scanner-settings · МосХаб</title>
+<headline>Российское сообщество разработчиков программного кода...</headline>
+<modtime>20240320T153824</modtime>
+<size>598</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z430C58D8697CBF2D">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1700468608&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/6yntar05/BebraCraft/-/blob/main/.gitignore&amp;l10n=ru&amp;mime=html&amp;sign=e951bf5fcaebc01bdfd0c41e83c8c4f4&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/6yntar05/BebraCraft/-/blob/main/.gitignore</url>
+<domain>hub.mos.ru</domain>
+<title>gitignore · main · Станислав / BebraCraft · МосХаб</title>
+<headline>Российское сообщество разработчиков программного кода...</headline>
+<modtime>20230621T084946</modtime>
+<size>622</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z15D4DC1C7D6AE55B">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1697894144&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/40ants/reblocks/-/tree/master/src&amp;l10n=ru&amp;mime=html&amp;sign=88d4f230bbb22591a6fde14da6e1f190&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/40ants/reblocks/-/tree/master/src</url>
+<domain>hub.mos.ru</domain>
+<title>src · master · 40Ants Common Lisp Software / reblocks · МосХаб</title>
+<modtime>20231021T161324</modtime>
+<size>710</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage><hlword>app</hlword>-actions.lisp. <hlword>app</hlword>-dependencies.lisp.</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z5B83BBEDF977CB09">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1710836608&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/falter0711/school-ringer/-/tree/master&amp;l10n=ru&amp;mime=html&amp;sign=fa01358cb1fd92a1be5384b87e419403&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/falter0711/school-ringer/-/tree/master</url>
+<domain>hub.mos.ru</domain>
+<title>Файлы · master · Владимир / school-ringer · МосХаб</title>
+<headline>Российское сообщество разработчиков программного кода...</headline>
+<modtime>20240319T110708</modtime>
+<size>608</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z59384D0A2BAFC487">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1697894016&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/40ants/reblocks/-/blob/master/reblocks.asd&amp;l10n=ru&amp;mime=html&amp;sign=0616047dbb28c17cb4c5cb0659cd93c8&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/40ants/reblocks/-/blob/master/reblocks.asd</url>
+<domain>hub.mos.ru</domain>
+<title>reblocks.asd · master · 40Ants Common Lisp Software / reblocks...</title>
+<modtime>20231021T161324</modtime>
+<size>949</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage>;; to load js dependencies after <hlword>app</hlword> was started.</passage>
+<passage>&quot;reblocks/<hlword>app</hlword>-dependencies&quot;. 37. ;; This package defines an :around method for reblocks/widgets:render.</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z30F9AC4E81FAA83E">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1700773632&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/10a/10a/-/tree/master&amp;l10n=ru&amp;mime=html&amp;sign=b6d7703ee6719816b600aa24672bbf8f&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/10a/10a/-/tree/master</url>
+<domain>hub.mos.ru</domain>
+<title>Файлы · master · 10A / 10A · МосХаб</title>
+<modtime>20231116T125234</modtime>
+<size>978</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage>The root of the repository contains the out of the dotnet new console command, which generates a new console <hlword>application</hlword> that just prints out &quot;Hello, World.&quot;</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="ZF4599C49F1B49ED4">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1703464320&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/-/snippets/182&amp;l10n=ru&amp;mime=html&amp;sign=912ababd61f9b594f0b55af37fa8edeb&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/-/snippets/182</url>
+<domain>hub.mos.ru</domain>
+<title>Telegram send message ($182) · Сниппеты · Сниппеты · МосХаб</title>
+<headline>Российское сообщество разработчиков программного кода...</headline>
+<modtime>20231225T031311</modtime>
+<size>339</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z54D8C356B6BE20D9">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1699406208&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/40ants/reblocks/-/blob/master/TODO.org&amp;l10n=ru&amp;mime=html&amp;sign=211303f4f956c4c546fa382608ed7d54&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/40ants/reblocks/-/blob/master/TODO.org</url>
+<domain>hub.mos.ru</domain>
+<title>TODO.org · master · 40Ants Common Lisp Software / reblocks · МосХаб</title>
+<modtime>20231021T161324</modtime>
+<size>706</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage>Get rid of distinction between :pre :post and :dynamic hooks. Code for adding a hook should look like: (add-<hlword>application</hlword>-hook my-hook () (some-code-of-implementation) (call-next-hook)).</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="Z73404F760035A5B5">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=en&amp;la=1697895168&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/40ants/reblocks/-/blob/master/license.txt&amp;l10n=ru&amp;mime=html&amp;sign=83363dc79b23dc6ccbf87beb6fa0f7bb&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/40ants/reblocks/-/blob/master/license.txt</url>
+<domain>hub.mos.ru</domain>
+<title>license.txt · master · 40Ants Common Lisp Software / reblocks · МосХаб</title>
+<modtime>20231021T161324</modtime>
+<size>1460</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage><hlword>applications</hlword> consists of this document plus the LGPL. Wherever there.</passage>
+<passage>does not mean that the <hlword>application</hlword> is necessarily a &quot;work based on the.</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>en</lang>
+</properties>
+</doc>
+</group>
+<group>
+<categ attr="d" name="mos.ru"/>
+<doccount>1</doccount>
+<relevance priority="all"/>
+<doc id="ZDDBDD94AA80580F1">
+<relevance priority="all"/>
+<saved-copy-url>https://yandexwebcache.net/yandbtm?fmode=inject&amp;tm=1711213872&amp;tld=ru&amp;lang=ru&amp;la=1697896960&amp;text=host%3Ahub.mos.ru+financial+applications&amp;url=https%3A//hub.mos.ru/40ants/reblocks/-/blob/master/README.md&amp;l10n=ru&amp;mime=html&amp;sign=e5ff26f2c5a2ac785060ffb3ebe431f6&amp;keyno=0</saved-copy-url>
+<url>https://hub.mos.ru/40ants/reblocks/-/blob/master/README.md</url>
+<domain>hub.mos.ru</domain>
+<title>README.md · master · 40Ants Common Lisp Software / reblocks...</title>
+<modtime>20231021T161324</modtime>
+<size>851</size>
+<charset>utf-8</charset>
+<mime-type>text/html</mime-type>
+<passages>
+<passage><hlword>Application</hlword> pages are built from &quot;widgets&quot;. All business logic could be implemented in Common Lisp in server-side. Framework&#39;s code is separated by functionality into a separate packages.</passage>
+</passages>
+<properties>
+<_PassagesType>0</_PassagesType>
+<lang>ru</lang>
+</properties>
+</doc>
+</group>
+<found priority="phrase">10</found>
+<found priority="strict">10</found>
+<found priority="all">10</found>
+<found-docs priority="phrase">10</found-docs>
+<found-docs priority="strict">10</found-docs>
+<found-docs priority="all">10</found-docs>
+<found-docs-human>нашёл 10 ответов</found-docs-human>
+</grouping>
+</results>
+</response>
+</yandexsearch>
