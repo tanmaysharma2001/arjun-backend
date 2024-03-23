@@ -1,6 +1,11 @@
-# arjun-backend
+# summarization-service
 
-## Setup and Run
+## Usage
+```bash
+pip install -r requirements.txt
+```
 
-- `poetry install`
-- `poetry run uvicorn main:app --reload`
+## Run the application
+```bash
+python3 main.py 
+```
