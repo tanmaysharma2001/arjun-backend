@@ -38,7 +38,7 @@ async def summarize(lang, readme_content, description):
 
 
 async def get_final_summary(ranked_repositories):
-    client = AsyncOpenAI(timeout=10)
+    client = AsyncOpenAI(timeout=10, max_retries=5)
 
     response = await client.chat.completions.create(
         model="gpt-4-turbo-preview",
