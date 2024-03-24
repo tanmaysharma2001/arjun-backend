@@ -6,6 +6,7 @@ import xmltodict
 import asyncio
 import threading
 import urllib
+from qa.utils.rank import rank_repositories
 
 API_KEY = os.getenv("SERP_API")
 YC_FOLDER = os.getenv("YC_FOLDER")
@@ -20,29 +21,58 @@ from qa.utils.query_generator import generate_queries
 from qa.utils.summarize import summarize
 
 
-async def smart_search(lang, query):
-    queries = await generate_queries(lang, query)
-    keywords = await generate_keywords(lang, queries)
+async def smart_search(lang, query, n_results):
+    en_queries = await generate_queries('en', query)
+    en_keywords = await generate_keywords('en', en_queries)
+
+    ru_queries = await generate_queries('ru', query)
+    ru_keywords = await generate_keywords('ru', ru_queries)
+
     repositories = []
     threads = []
-    for keyword in keywords:
+    for i in range(len(min(en_keywords, ru_keywords))):
+        
+        # Github
         _t = threading.Thread(
             target=asyncio.run,
-            args=(search_github_repositories(keyword, repositories, lang),),
+
+            # Search in english only because github api doesn't provide good results for russian keywords
+            args=(search_github_repositories(en_keywords[i], repositories, lang),),
         )
         threads.append(_t)
         _t.start()
+
+        # Gitverse
         _t = threading.Thread(
             target=asyncio.run,
-            args=(search_gitverse_repositories(keyword, repositories, lang),),
+            args=(search_gitverse_repositories(
+                en_keywords[i] if lang == 'en' else ru_keywords[i], repositories, lang),),
         )
         threads.append(_t)
         _t.start()
+
 
     for thread in threads:
         thread.join()
 
-    return repositories
+    # readme_content and description are not necessary anymore
+    for repo in repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
+    
+
+    # Remove duplicate repos
+    done = set()
+    unique_repos = []
+    for repo in repositories:
+        if repo['url'] not in done:
+            done.add(repo['url'])
+            unique_repos.append(repo)
+
+    # Get top ranked repositories
+    ranked_repositories = rank_repositories(query, unique_repos, n_results)
+
+    return ranked_repositories
 
 
 async def process_github_result(result: dict, results: list, lang: str = "en") -> None:
@@ -149,7 +179,6 @@ async def process_gitverse_result(
             readme_content = repo_info["readme_content"]
 
             summary = await summarize(lang, readme_content, result.get("headline"))
-
             results.append(
                 {
                     "name": title,
@@ -167,7 +196,6 @@ async def process_gitverse_result(
 
 
 async def search_gitverse_repositories(query: str, repos: list, lang: str = "en"):
-
     url = "https://yandex.ru/search/xml"
     params = {
         "folderid": YC_FOLDER,
@@ -179,14 +207,18 @@ async def search_gitverse_repositories(query: str, repos: list, lang: str = "en"
         response = await client.get(url, params=params)
         data_dict = xmltodict.parse(response.text)
         try:
-            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"][
-                "group"
-            ]["doc"]
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]["doc"]
         except KeyError:
             print(data_dict)
             _res = []
+        except TypeError:
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
+        
         threads = []
+        
         for result in _res:
+            if "doc" in result.keys():
+                result = result["doc"]
             _t = threading.Thread(
                 target=asyncio.run,
                 args=(process_gitverse_result(result, results, lang),),

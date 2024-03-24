@@ -23,13 +23,15 @@ async def summarize(lang, readme_content, description):
             },
             {
                 "role": "user",
-                "content": f"""TARGET LANGUAGE: {lang} \n 
-  REPOSITORY README : {readme_content} \n 
-  REPOSITORY DESCRIPTION : {description}""",
+                "content": f"""
+                            TARGET LANGUAGE: {lang} \n 
+                            REPOSITORY README : {readme_content} \n 
+                            REPOSITORY DESCRIPTION : {description}
+                            """,
             },
         ],
     )
 
     summary = json.loads(response.choices[0].message.content)
-    print(summary)
+    # print(summary)
     return summary["summary"]
