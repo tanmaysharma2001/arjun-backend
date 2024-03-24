@@ -30,7 +30,7 @@ async def smart_search(lang, query, n_results):
 
     repositories = []
     threads = []
-    for i in range(len(min(en_keywords, ru_keywords))):
+    for i in range(min(len(en_keywords), len(ru_keywords))):
         
         # Github
         _t = threading.Thread(
@@ -38,6 +38,7 @@ async def smart_search(lang, query, n_results):
 
             # Search in english only because github api doesn't provide good results for russian keywords
             args=(search_github_repositories(en_keywords[i], repositories, lang),),
+            daemon=True,
         )
         threads.append(_t)
         _t.start()
@@ -47,6 +48,7 @@ async def smart_search(lang, query, n_results):
             target=asyncio.run,
             args=(search_gitverse_repositories(
                 en_keywords[i] if lang == 'en' else ru_keywords[i], repositories, lang),),
+            daemon=True,
         )
         threads.append(_t)
         _t.start()
@@ -139,6 +141,7 @@ async def search_github_repositories(query, repos: list, lang: str = "en"):
             _t = threading.Thread(
                 target=asyncio.run,
                 args=(process_github_result(item, repositories, lang),),
+                daemon=True,
             )
             threads.append(_t)
             _t.start()
@@ -222,6 +225,7 @@ async def search_gitverse_repositories(query: str, repos: list, lang: str = "en"
             _t = threading.Thread(
                 target=asyncio.run,
                 args=(process_gitverse_result(result, results, lang),),
+                daemon=True,
             )
             threads.append(_t)
             _t.start()
