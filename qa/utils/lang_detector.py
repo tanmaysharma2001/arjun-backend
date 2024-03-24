@@ -9,10 +9,10 @@ load_dotenv(find_dotenv())
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-def detect_lang(query):
+async def detect_lang(query):
     client = AsyncOpenAI(timeout=10)
 
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="gpt-4-turbo-preview",
         response_format={"type": "json_object"},
         messages=[
