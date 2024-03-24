@@ -6,7 +6,6 @@ import xmltodict
 import asyncio
 import threading
 import urllib
-from qa.utils.rank import rank_repositories
 import math
 
 API_KEY = os.getenv("SERP_API")
@@ -19,25 +18,25 @@ GIT_TOKEN = os.environ["GIT_TOKEN"]
 
 from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
-from qa.utils.summarize import summarize
+from qa.utils.summarize import summarize, get_final_summary
+from qa.utils.rank import rank_repositories
 
 
 async def smart_search(lang, query, n_results):
-    en_queries = await generate_queries('en', query)
-    en_keywords = await generate_keywords('en', en_queries)
+    en_queries = await generate_queries("en", query)
+    en_keywords = await generate_keywords("en", en_queries)
 
-    ru_queries = await generate_queries('ru', query)
-    ru_keywords = await generate_keywords('ru', ru_queries)
+    ru_queries = await generate_queries("ru", query)
+    ru_keywords = await generate_keywords("ru", ru_queries)
 
     github_repositories = []
     gitverse_repositories = []
     threads = []
     for i in range(min(len(en_keywords), len(ru_keywords))):
-        
+
         # Github
         _t = threading.Thread(
             target=asyncio.run,
-
             # Search in english only because github api doesn't provide good results for russian keywords
             args=(search_github_repositories(
                 en_keywords[i], github_repositories, lang),),
@@ -49,13 +48,17 @@ async def smart_search(lang, query, n_results):
         # Gitverse
         _t = threading.Thread(
             target=asyncio.run,
-            args=(search_gitverse_repositories(
-                en_keywords[i] if lang == 'en' else ru_keywords[i], gitverse_repositories, lang),),
+            args=(
+                search_gitverse_repositories(
+                    en_keywords[i] if lang == "en" else ru_keywords[i],
+                    gitverse_repositories,
+                    lang,
+                ),
+            ),
             daemon=True,
         )
         threads.append(_t)
         _t.start()
-
 
     for thread in threads:
         thread.join()
@@ -65,37 +68,20 @@ async def smart_search(lang, query, n_results):
         repo.pop("readme_content", None)
         repo.pop("description", None)
     
-    for repo in gitverse_repositories:
-        repo.pop("readme_content", None)
-        repo.pop("description", None)
-
-    # Remove duplicate repos for github
-    done = set()
-    unique_github_repos = []
-    for repo in github_repositories:
-        if repo['url'] not in done:
-            done.add(repo['url'])
-            unique_github_repos.append(repo)
 
     # Remove duplicate repos for gitverse
     done = set()
-    unique_gitverse_repos = []
-    for repo in gitverse_repositories:
+    unique_repos = []
+    for repo in repositories:
         if repo['url'] not in done:
             done.add(repo['url'])
-            unique_gitverse_repos.append(repo)
-
-
+            unique_repos.append(repo)
 
     # Get top ranked github repositories
     ranked_github_repositories = rank_repositories(
         query, unique_github_repos, math.floor(n_results *0.8))
 
-    # Get top ranked gitverse repositories
-    ranked_gitverse_repositories = rank_repositories(
-        query, unique_gitverse_repos, math.ceil(n_results * 0.2))
-
-    return ranked_github_repositories + ranked_gitverse_repositories
+    return ranked_repositories
 
 
 async def process_github_result(result: dict, results: list, lang: str = "en") -> None:
@@ -231,15 +217,17 @@ async def search_gitverse_repositories(query: str, repos: list, lang: str = "en"
         response = await client.get(url, params=params)
         data_dict = xmltodict.parse(response.text)
         try:
-            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]["doc"]
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"][
+                "group"
+            ]["doc"]
         except KeyError:
             print(data_dict)
             _res = []
         except TypeError:
             _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
-        
+
         threads = []
-        
+
         for result in _res:
             if "doc" in result.keys():
                 result = result["doc"]

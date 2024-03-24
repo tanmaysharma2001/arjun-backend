@@ -35,3 +35,23 @@ async def summarize(lang, readme_content, description):
     summary = json.loads(response.choices[0].message.content)
     # print(summary)
     return summary["summary"]
+
+
+async def get_final_summary(ranked_repositories):
+    client = AsyncOpenAI(timeout=10)
+
+    response = await client.chat.completions.create(
+        model="gpt-4-turbo-preview",
+        response_format={"type": "json_object"},
+        messages=[
+            {
+                "role": "system",
+                "content": SUMMERIZER_PROMPT,
+            },
+            {"role": "user", "content": f"""{json.dumps(ranked_repositories)}"""},
+        ],
+    )
+
+    summary = json.loads(response.choices[0].message.content)
+    # print(summary)
+    return summary["summary"]
