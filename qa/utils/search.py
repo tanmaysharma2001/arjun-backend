@@ -7,6 +7,7 @@ import asyncio
 import threading
 import urllib
 from qa.utils.rank import rank_repositories
+import math
 
 API_KEY = os.getenv("SERP_API")
 YC_FOLDER = os.getenv("YC_FOLDER")
@@ -28,7 +29,8 @@ async def smart_search(lang, query, n_results):
     ru_queries = await generate_queries('ru', query)
     ru_keywords = await generate_keywords('ru', ru_queries)
 
-    repositories = []
+    github_repositories = []
+    gitverse_repositories = []
     threads = []
     for i in range(min(len(en_keywords), len(ru_keywords))):
         
@@ -37,7 +39,8 @@ async def smart_search(lang, query, n_results):
             target=asyncio.run,
 
             # Search in english only because github api doesn't provide good results for russian keywords
-            args=(search_github_repositories(en_keywords[i], repositories, lang),),
+            args=(search_github_repositories(
+                en_keywords[i], github_repositories, lang),),
             daemon=True,
         )
         threads.append(_t)
@@ -47,7 +50,7 @@ async def smart_search(lang, query, n_results):
         _t = threading.Thread(
             target=asyncio.run,
             args=(search_gitverse_repositories(
-                en_keywords[i] if lang == 'en' else ru_keywords[i], repositories, lang),),
+                en_keywords[i] if lang == 'en' else ru_keywords[i], gitverse_repositories, lang),),
             daemon=True,
         )
         threads.append(_t)
@@ -58,23 +61,41 @@ async def smart_search(lang, query, n_results):
         thread.join()
 
     # readme_content and description are not necessary anymore
-    for repo in repositories:
+    for repo in github_repositories:
         repo.pop("readme_content", None)
         repo.pop("description", None)
     
+    for repo in gitverse_repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
 
-    # Remove duplicate repos
+    # Remove duplicate repos for github
     done = set()
-    unique_repos = []
-    for repo in repositories:
+    unique_github_repos = []
+    for repo in github_repositories:
         if repo['url'] not in done:
             done.add(repo['url'])
-            unique_repos.append(repo)
+            unique_github_repos.append(repo)
 
-    # Get top ranked repositories
-    ranked_repositories = rank_repositories(query, unique_repos, n_results)
+    # Remove duplicate repos for gitverse
+    done = set()
+    unique_gitverse_repos = []
+    for repo in gitverse_repositories:
+        if repo['url'] not in done:
+            done.add(repo['url'])
+            unique_gitverse_repos.append(repo)
 
-    return ranked_repositories
+
+
+    # Get top ranked github repositories
+    ranked_github_repositories = rank_repositories(
+        query, unique_github_repos, math.floor(n_results *0.8))
+
+    # Get top ranked gitverse repositories
+    ranked_gitverse_repositories = rank_repositories(
+        query, unique_gitverse_repos, math.ceil(n_results * 0.2))
+
+    return ranked_github_repositories + ranked_gitverse_repositories
 
 
 async def process_github_result(result: dict, results: list, lang: str = "en") -> None:
@@ -113,7 +134,7 @@ async def search_github_repositories(query, repos: list, lang: str = "en"):
     license = "mit"
     forks = "100"
 
-    per_page = 10
+    per_page = 5
 
     payload = {}
     headers = {
@@ -123,10 +144,11 @@ async def search_github_repositories(query, repos: list, lang: str = "en"):
 
     params = {
         "q": query,
-        "stars": stars,
-        "license": license,
-        "forks": forks,
+        # "stars": stars,
+        # "license": license,
+        # "forks": forks,
         "per_page": per_page,
+        "page": 1,
     }
 
     try:
@@ -154,7 +176,6 @@ async def search_github_repositories(query, repos: list, lang: str = "en"):
 
 
 async def get_readme_content_github(full_name):
-    print(full_name)
     url = f"https://api.github.com/repos/{full_name}/readme"
     headers = {
         "Accept": "application/vnd.github.v3.raw+json",
