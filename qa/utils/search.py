@@ -93,7 +93,7 @@ async def smart_search(lang, query, n_results):
         query, unique_repos, math.floor(n_results * 0.8)
     )
 
-    summary = await get_final_summary(ranked_repositories=rank_repositories)
+    summary = await get_final_summary(ranked_repositories=ranked_repositories)
 
     return {"summary": summary, "sources": ranked_repositories}
 
