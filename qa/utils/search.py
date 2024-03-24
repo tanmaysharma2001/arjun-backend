@@ -5,6 +5,7 @@ import httpx
 import xmltodict
 import asyncio
 import threading
+import urllib
 
 API_KEY = os.getenv("SERP_API")
 YC_FOLDER = os.getenv("YC_FOLDER")
@@ -60,7 +61,6 @@ async def process_github_result(result: dict, results: list) -> None:
 async def search_github_repositories(query, repos: list):
 
     print(query)
-    await asyncio.sleep(0.001)
 
     url = "https://api.github.com/search/repositories"
     stars = "100"
@@ -104,13 +104,11 @@ async def search_github_repositories(query, repos: list):
 
 
 async def get_readme_content_github(full_name):
-    await asyncio.sleep(0.001)
     print(full_name)
     url = f"https://api.github.com/repos/{full_name}/readme"
-    github_token = "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"
     headers = {
         "Accept": "application/vnd.github.v3.raw+json",
-        "Authorization": f"token {github_token}",
+        "Authorization": f"token {GIT_TOKEN}",
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers)
@@ -120,8 +118,7 @@ async def get_readme_content_github(full_name):
         return "README not found or access denied."
 
 async def process_gitverse_result(result: dict, results: list) -> None:
-    doc = result["doc"]
-    repo_url = await extract_gitverse_repo_url(doc["url"])
+    repo_url = await extract_gitverse_repo_url(result["url"])
 
     if repo_url is not None:
         try: 
@@ -137,14 +134,13 @@ async def process_gitverse_result(result: dict, results: list) -> None:
                 "url": repo_url,
                 "forks": forks,
                 "stars": stars,
-                "description": doc.get("headline"),
+                "description": result.get("headline"),
                 "readme_content": readme_content,
             })
         except Exception as e:
             print(f"Error occurred while scraping {repo_url}. Details:", e)
 
 async def search_gitverse_repositories(query: str, repos: list):
-    await asyncio.sleep(0.001)
 
     url = "https://yandex.ru/search/xml"
     params = {
@@ -157,7 +153,7 @@ async def search_gitverse_repositories(query: str, repos: list):
         response = await client.get(url, params=params)
         data_dict = xmltodict.parse(response.text)
         try:
-            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]["doc"]
         except KeyError:
             print(data_dict)
             _res = []
@@ -172,7 +168,6 @@ async def search_gitverse_repositories(query: str, repos: list):
     repos.extend(results)
 
 async def scrape_gitverse(gitverse_repo_url: str) -> dict:
-    await asyncio.sleep(0.001)
 
     info = {}
 
@@ -207,7 +202,6 @@ async def scrape_gitverse(gitverse_repo_url: str) -> dict:
 
 
 async def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
-    await asyncio.sleep(0.001)
 
     gitverse_repo_full_name = gitverse_repo_url.split(
         "/")[3] + "/" + gitverse_repo_url.split("/")[4]
@@ -228,7 +222,6 @@ async def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
 
 
 async def extract_gitverse_repo_url(file_url: str) -> str:
-    await asyncio.sleep(0.001)
     # Split the URL into parts
     parts = file_url.split('/')
     # Check if the URL is valid and contains enough parts to extract the repo URL
@@ -238,3 +231,17 @@ async def extract_gitverse_repo_url(file_url: str) -> str:
         return repo_url
     else:
         return None
+    
+async def get_github_repo_info(repo_url: str) -> dict:
+    # extract the owner and repo name
+    url = urllib.parse.urlparse(repo_url)
+    path = url.path.split("/")
+    owner = path[1]
+    repo = path[2]
+    # construct the API URL
+    api_url = f"https://api.github.com/repos/{owner}/{repo}"
+    # make the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(api_url)
+        data = response.json()
+    return data
