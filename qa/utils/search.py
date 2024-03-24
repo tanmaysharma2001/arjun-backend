@@ -67,19 +67,29 @@ async def smart_search(lang, query, n_results):
     for repo in github_repositories:
         repo.pop("readme_content", None)
         repo.pop("description", None)
-    
+
+    for repo in gitverse_repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
+
+    # Remove duplicate repos for github
+    done = set()
+    unique_repos = []
+    for repo in github_repositories:
+        if repo['url'] not in done:
+            done.add(repo['url'])
+            unique_repos.append(repo)
 
     # Remove duplicate repos for gitverse
     done = set()
-    unique_repos = []
-    for repo in repositories:
+    for repo in gitverse_repositories:
         if repo['url'] not in done:
             done.add(repo['url'])
             unique_repos.append(repo)
 
     # Get top ranked github repositories
-    ranked_github_repositories = rank_repositories(
-        query, unique_github_repos, math.floor(n_results *0.8))
+    ranked_repositories = rank_repositories(
+        query, unique_repos, math.floor(n_results *0.8))
 
     return ranked_repositories
 
