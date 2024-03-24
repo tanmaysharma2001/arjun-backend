@@ -17,7 +17,7 @@ GIT_TOKEN = os.environ["GIT_TOKEN"]
 
 from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
-from qa.utils.summarize import summerize
+from qa.utils.summarize import summarize
 
 
 async def smart_search(lang, query):
@@ -56,7 +56,7 @@ async def process_github_result(result: dict, results: list, lang: str = "en") -
         repo_readme_content = repo_description
 
     # TODO
-    summary = summerize(lang, repo_readme_content, repo_description)
+    summary = await summarize(lang, repo_readme_content, repo_description)
 
     results.append(
         {
@@ -148,7 +148,7 @@ async def process_gitverse_result(
             stars = repo_info["stars"]
             readme_content = repo_info["readme_content"]
 
-            summary = summerize(lang, readme_content, result.get("headline"))
+            summary = await summarize(lang, readme_content, result.get("headline"))
 
             results.append(
                 {

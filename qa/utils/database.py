@@ -15,5 +15,5 @@ def add_repo_to_db(data: dict) -> None:
         "stars": data["stars"],
         "description": data["description"],
         "readme_content": data["readme_content"],
-        # "summary": "abcd" #data["summary"]
+        "summary": data["summary"]
     }).execute()

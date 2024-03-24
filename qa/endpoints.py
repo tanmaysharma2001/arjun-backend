@@ -23,7 +23,6 @@ async def add_repo(repo: RepoAddRequest):
         await process_github_result(await get_github_repo_info(url), result)
     elif "gitverse.ru" in url:
         await process_gitverse_result({"url": url}, result)
-    
     res = result[0]
     add_repo_to_db(res)
     return res

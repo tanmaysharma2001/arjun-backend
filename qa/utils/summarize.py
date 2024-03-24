@@ -10,7 +10,7 @@ load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
-async def summerize(lang, readme_content, description):
+async def summarize(lang, readme_content, description):
     client = AsyncOpenAI()
 
     response = await client.chat.completions.create(
