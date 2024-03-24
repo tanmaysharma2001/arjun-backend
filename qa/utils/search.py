@@ -130,7 +130,7 @@ async def search_github_repositories(query, repos: list, lang: str = "en"):
     }
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(url, headers=headers, params=params)
             data = response.json()
 
@@ -160,7 +160,7 @@ async def get_readme_content_github(full_name):
         "Accept": "application/vnd.github.v3.raw+json",
         "Authorization": f"token {GIT_TOKEN}",
     }
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         response = await client.get(url, headers=headers)
     if response.status_code == 200:
         return response.text
@@ -205,7 +205,7 @@ async def search_gitverse_repositories(query: str, repos: list, lang: str = "en"
         "apikey": YC_SECRET_KEY,
     }
     results = []
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         params["query"] = query + " host:gitverse.ru"
         response = await client.get(url, params=params)
         data_dict = xmltodict.parse(response.text)
@@ -241,7 +241,7 @@ async def scrape_gitverse(gitverse_repo_url: str) -> dict:
 
     print(f"Scraping {gitverse_repo_url}")
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(gitverse_repo_url)
             html_content = response.text
 
@@ -310,7 +310,7 @@ async def get_github_repo_info(repo_url: str) -> dict:
     # construct the API URL
     api_url = f"https://api.github.com/repos/{owner}/{repo}"
     # make the request
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10) as client:
         response = await client.get(api_url)
         data = response.json()
     return data

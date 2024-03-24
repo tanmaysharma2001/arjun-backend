@@ -1,7 +1,7 @@
 import os
 import json
 import openai
-from openai import OpenAI
+from openai import AsyncOpenAI
 from dotenv import load_dotenv, find_dotenv
 from .prompts import LANG_DETECTOR_PROMPT
 
@@ -9,11 +9,8 @@ load_dotenv(find_dotenv())
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-client = OpenAI()
-
-
 def detect_lang(query):
-    client = OpenAI()
+    client = AsyncOpenAI(timeout=10)
 
     response = client.chat.completions.create(
         model="gpt-4-turbo-preview",

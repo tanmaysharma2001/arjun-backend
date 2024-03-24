@@ -12,7 +12,7 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 async def generate_keywords(lang, queries):
-    client = AsyncOpenAI()
+    client = AsyncOpenAI(timeout=10)
     
     keyword_list = []
 

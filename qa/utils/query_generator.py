@@ -10,7 +10,7 @@ load_dotenv(find_dotenv())
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 async def generate_queries(lang, query):
-    client = AsyncOpenAI()
+    client = AsyncOpenAI(timeout=10)
 
     response = await client.chat.completions.create(
         model="gpt-4-turbo-preview",

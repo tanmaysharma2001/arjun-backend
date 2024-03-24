@@ -11,7 +11,7 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 async def summarize(lang, readme_content, description):
-    client = AsyncOpenAI()
+    client = AsyncOpenAI(timeout=10)
 
     response = await client.chat.completions.create(
         model="gpt-4-turbo-preview",
