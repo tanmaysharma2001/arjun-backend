@@ -13,6 +13,8 @@ serpapi = "^0.1.5"
 uvicorn = "^0.29.0"
 python-dotenv = "^1.0.1"
 xmltodict = "^0.13.0"
+bs4 = "^0.0.2"
+beautifulsoup4 = "^4.12.3"
 
 
 [build-system]
