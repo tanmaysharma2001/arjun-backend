@@ -3,7 +3,7 @@ import json
 import openai
 from openai import AsyncOpenAI
 from dotenv import load_dotenv, find_dotenv
-from .prompts import SUMMERIZER_PROMPT
+from .prompts import MASTER_SUMMERIZER_PROMPT, SUMMERIZER_PROMPT
 
 load_dotenv(find_dotenv())
 
@@ -46,7 +46,7 @@ async def get_final_summary(ranked_repositories):
         messages=[
             {
                 "role": "system",
-                "content": SUMMERIZER_PROMPT,
+                "content": MASTER_SUMMERIZER_PROMPT,
             },
             {"role": "user", "content": f"""{json.dumps(ranked_repositories)}"""},
         ],

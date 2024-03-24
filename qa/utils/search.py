@@ -38,8 +38,9 @@ async def smart_search(lang, query, n_results):
         _t = threading.Thread(
             target=asyncio.run,
             # Search in english only because github api doesn't provide good results for russian keywords
-            args=(search_github_repositories(
-                en_keywords[i], github_repositories, lang),),
+            args=(
+                search_github_repositories(en_keywords[i], github_repositories, lang),
+            ),
             daemon=True,
         )
         threads.append(_t)
@@ -76,22 +77,25 @@ async def smart_search(lang, query, n_results):
     done = set()
     unique_repos = []
     for repo in github_repositories:
-        if repo['url'] not in done:
-            done.add(repo['url'])
+        if repo["url"] not in done:
+            done.add(repo["url"])
             unique_repos.append(repo)
 
     # Remove duplicate repos for gitverse
     done = set()
     for repo in gitverse_repositories:
-        if repo['url'] not in done:
-            done.add(repo['url'])
+        if repo["url"] not in done:
+            done.add(repo["url"])
             unique_repos.append(repo)
 
     # Get top ranked github repositories
     ranked_repositories = rank_repositories(
-        query, unique_repos, math.floor(n_results *0.8))
+        query, unique_repos, math.floor(n_results * 0.8)
+    )
 
-    return ranked_repositories
+    summary = get_final_summary(ranked_repositories=rank_repositories)
+
+    return {"summary": summary, "sources": ranked_repositories}
 
 
 async def process_github_result(result: dict, results: list, lang: str = "en") -> None:
