@@ -1,7 +1,7 @@
 import os
 import json
 import openai
-from openai import OpenAI
+from openai import AsyncOpenAI
 from dotenv import load_dotenv, find_dotenv
 from .prompts import QUERY_GENERATOR_PROMPT
 
@@ -9,12 +9,10 @@ load_dotenv(find_dotenv())
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-client = OpenAI()
+async def generate_queries(lang, query):
+    client = AsyncOpenAI()
 
-def generate_queries(lang, query):
-    client = OpenAI()
-
-    response = client.chat.completions.create(
+    response = await client.chat.completions.create(
         model="gpt-4-turbo-preview",
         response_format={"type": "json_object"},
         messages=[

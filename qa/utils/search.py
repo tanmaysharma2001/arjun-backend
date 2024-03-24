@@ -1,9 +1,10 @@
-import requests
 import os
 from dotenv import load_dotenv, find_dotenv
 from bs4 import BeautifulSoup
 import httpx
 import xmltodict
+import asyncio
+import threading
 
 API_KEY = os.getenv("SERP_API")
 YC_FOLDER = os.getenv("YC_FOLDER")
@@ -18,22 +19,48 @@ from qa.utils.query_generator import generate_queries
 
 
 async def smart_search(lang, query):
-    queries = generate_queries(lang, query)
-    keywords = generate_keywords(lang, queries)
+    queries = await generate_queries(lang, query)
+    keywords = await generate_keywords(lang, queries)
     repositories = []
+    threads = []
     for keyword in keywords:
-        github_repos = search_github_repositories(keyword)
-        repositories.extend(github_repos)
-        gitverse_repos = await search_gitverse_repositories(keyword)
-        repositories.extend(gitverse_repos)
+        _t = threading.Thread(target=asyncio.run, args=(search_github_repositories(keyword, repositories),))
+        threads.append(_t)
+        _t.start()
+        _t = threading.Thread(target=asyncio.run, args=(search_gitverse_repositories(keyword, repositories),))
+        threads.append(_t)
+        _t.start()
+
+    for thread in threads:
+        thread.join()
 
 
     return repositories
 
+async def process_github_result(result: dict, results: list) -> None:
+    repo_name = result["name"]
+    repo_url = result["html_url"]
+    repo_forks = result["forks_count"]
+    repo_stars = result["stargazers_count"]
+    repo_description = result["description"]
+    repo_readme_content = await get_readme_content_github(result["full_name"])
+    if repo_readme_content == "README not found or access denied.":
+        repo_readme_content = repo_description
 
-def search_github_repositories(query):
+    results.append({
+        "name": repo_name,
+        "version_control": "github",
+        "url": repo_url,
+        "forks": repo_forks,
+        "stars": repo_stars,
+        "description": repo_description,
+        "readme_content": repo_readme_content,
+    })
+
+async def search_github_repositories(query, repos: list):
 
     print(query)
+    await asyncio.sleep(0.001)
 
     url = "https://api.github.com/search/repositories"
     stars = "100"
@@ -57,43 +84,27 @@ def search_github_repositories(query):
     }
 
     try:
-        response = requests.request(
-            "GET", url, headers=headers, data=payload, params=params
-        )
-        data = response.json()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=headers, params=params)
+            data = response.json()
 
         repositories = []
+        threads = []
 
         for item in data.get("items", []):
-            repo_name = item.get("name")
-            repo_url = item.get("html_url")
-            repo_forks = item.get("forks_count")
-            repo_stars = item.get("stargazers_count")
-            repo_full_name = item.get("full_name")
-            repo_description = item.get("description")
-            repo_readme_content = get_readme_content_github(repo_full_name) if get_readme_content_github(repo_full_name) \
-                != "README not found or access denied." \
-                    else repo_description
+            _t = threading.Thread(target=asyncio.run, args=(process_github_result(item, repositories),))
+            threads.append(_t)
+            _t.start()
+        for thread in threads:
+            thread.join()    
 
-            repositories.append(
-                {
-                    "name": repo_name,
-                    "version_control": "github",
-                    "url": repo_url,
-                    "forks": repo_forks,
-                    "stars": repo_stars,
-                    "description": repo_description,
-                    "readme_content": repo_readme_content,
-                }
-            )
-
-        return repositories
-    except requests.exceptions.RequestException as e:
+        repos.extend(repositories)
+    except Exception as e:
         print("Error occurred:", e)
-        return []
 
 
-def get_readme_content_github(full_name):
+async def get_readme_content_github(full_name):
+    await asyncio.sleep(0.001)
     print(full_name)
     url = f"https://api.github.com/repos/{full_name}/readme"
     github_token = "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"
@@ -101,14 +112,40 @@ def get_readme_content_github(full_name):
         "Accept": "application/vnd.github.v3.raw+json",
         "Authorization": f"token {github_token}",
     }
-    response = requests.get(url, headers=headers)
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
     if response.status_code == 200:
         return response.text
     else:
         return "README not found or access denied."
 
+async def process_gitverse_result(result: dict, results: list) -> None:
+    doc = result["doc"]
+    repo_url = await extract_gitverse_repo_url(doc["url"])
 
-async def search_gitverse_repositories(query: str):
+    if repo_url is not None:
+        try: 
+            repo_info = await scrape_gitverse(repo_url)
+            title = repo_info['title']
+            forks = repo_info['forks']
+            stars = repo_info['stars']
+            readme_content = repo_info['readme_content']
+
+            results.append({
+                "name": title,
+                "version_control": "gitverse",
+                "url": repo_url,
+                "forks": forks,
+                "stars": stars,
+                "description": doc.get("headline"),
+                "readme_content": readme_content,
+            })
+        except Exception as e:
+            print(f"Error occurred while scraping {repo_url}. Details:", e)
+
+async def search_gitverse_repositories(query: str, repos: list):
+    await asyncio.sleep(0.001)
+
     url = "https://yandex.ru/search/xml"
     params = {
         "folderid": YC_FOLDER,
@@ -124,38 +161,26 @@ async def search_gitverse_repositories(query: str):
         except KeyError:
             print(data_dict)
             _res = []
+        threads = []
         for result in _res:
-            doc = result["doc"]
-            repo_url = extract_gitverse_repo_url(doc["url"])
+            _t = threading.Thread(target=asyncio.run, args=(process_gitverse_result(result, results),))
+            threads.append(_t)
+            _t.start()
+        for thread in threads:
+            thread.join()
 
-            if repo_url is not None:
-                try: 
-                    repo_info = scrape_gitverse(repo_url)
-                    title = repo_info['title']
-                    forks = repo_info['forks']
-                    stars = repo_info['stars']
-                    readme_content = repo_info['readme_content']
+    repos.extend(results)
 
-                    results.append({
-                        "name": title,
-                        "version_control": "gitverse",
-                        "url": repo_url,
-                        "forks": forks,
-                        "stars": stars,
-                        "description": doc.get("headline"),
-                        "readme_content": readme_content,
-                    })
-                except Exception as e:
-                    print(f"Error occurred while scraping {repo_url}. Details:", e)
+async def scrape_gitverse(gitverse_repo_url: str) -> dict:
+    await asyncio.sleep(0.001)
 
-    return results
-
-def scrape_gitverse(gitverse_repo_url: str) -> dict:
     info = {}
 
     print(f"Scraping {gitverse_repo_url}")
     try:
-        html_content = requests.get(gitverse_repo_url).text
+        async with httpx.AsyncClient() as client:
+            response = await client.get(gitverse_repo_url)
+            html_content = response.text     
 
         soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -173,7 +198,7 @@ def scrape_gitverse(gitverse_repo_url: str) -> dict:
 
         info['stars'] = stars
 
-        info['readme_content'] = get_readme_content_gitverse(gitverse_repo_url)
+        info['readme_content'] = await get_readme_content_gitverse(gitverse_repo_url)
 
     except Exception as e:
         raise e
@@ -181,7 +206,9 @@ def scrape_gitverse(gitverse_repo_url: str) -> dict:
     return info
 
 
-def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
+async def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
+    await asyncio.sleep(0.001)
+
     gitverse_repo_full_name = gitverse_repo_url.split(
         "/")[3] + "/" + gitverse_repo_url.split("/")[4]
     readme_content = "no readme"
@@ -191,7 +218,8 @@ def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
         for md_variation in md_variations:
             gitverse_repo_readme_url = \
                 f"https://gitverse.ru/api/repos/{gitverse_repo_full_name}/raw/branch/{branch}/README.{md_variation}"
-            response = requests.get(gitverse_repo_readme_url)
+            async with httpx.AsyncClient() as client:
+                response = await client.get(gitverse_repo_readme_url)
             if response.status_code == 400:
                 continue
             readme_content = response.text
@@ -199,7 +227,8 @@ def get_readme_content_gitverse(gitverse_repo_url: str) -> str:
     return readme_content
 
 
-def extract_gitverse_repo_url(file_url: str) -> str:
+async def extract_gitverse_repo_url(file_url: str) -> str:
+    await asyncio.sleep(0.001)
     # Split the URL into parts
     parts = file_url.split('/')
     # Check if the URL is valid and contains enough parts to extract the repo URL
