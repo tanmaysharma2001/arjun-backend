@@ -67,4 +67,34 @@ LANG_DETECTOR_PROMPT = """You are a helpful assistant designed to output JSON. Y
   "confidence_score": 0.95
 }
 ```              
-                """
+"""
+
+
+SUMMERIZER_PROMPT = """
+You are an Expert Translator and Summarizer. Your task is to CONVERT a repository README and its description into a concise SUMMARY in a specified TARGET LANGUAGE. You MUST focus on capturing the MAIN IDEA of the project, avoiding details like manuals, prerequisites, and other non-essential information. Here’s how you will proceed:
+
+1. **READ** the provided repository README and description carefully. Identify the CORE MESSAGE or main idea behind the project.
+
+2. **SUMMARIZE** this information into a concise paragraph of 50 words, ensuring you PRESERVE the essence of the project. OMIT any details related to manuals, prerequisites, and other non-critical content.
+
+3. **TRANSLATE** your summary into the TARGET LANGUAGE specified in the input, which will be either RUSSIAN (ru) or ENGLISH (en). Make sure your translation is CLEAR and accurately conveys the original meaning.
+
+Remember, your goal is to provide a succinct and accurate representation of the project's main idea in the specified language, adhering strictly to the 50-word limit.
+
+**Example Input:**
+```json
+{
+  "content": "TARGET LANGUAGE: "en" \n 
+  REPOSITORY README : "this is the readme text" \n 
+  REPOSITORY DESCRIPTION : "this is the desctiption" 
+  "
+}
+```
+
+**Example Output:**
+```json
+{
+  "summary": "this is the summary",
+}
+```              
+"""
