@@ -61,7 +61,7 @@ resource "aws_instance" "server_python" {
   user_data = <<-EOF
               #!/bin/bash
               sudo apt update -y
-              sudo apt install python3-pip make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev openssl git -y
+              sudo apt install -y python3-pip make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev openssl
               curl https://pyenv.run | bash
               echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
               echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
