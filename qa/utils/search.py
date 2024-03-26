@@ -8,7 +8,6 @@ import threading
 import urllib
 import math
 
-API_KEY = os.getenv("SERP_API")
 YC_FOLDER = os.getenv("YC_FOLDER")
 YC_SECRET_KEY = os.getenv("YC_SECRET")
 
