@@ -1,15 +1,13 @@
 from qa.utils.git_services.github_api import GithubAPI
 from qa.utils.git_services.gitverse_api import GitverseAPI
 from qa.utils.git_services.gitlab_api import GitlabAPI
+from qa.utils.git_services.moshub_api import MoshubAPI
 from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
 from qa.utils.summarize import get_final_summary
 from qa.utils.rank import rank_repositories
 from dotenv import load_dotenv, find_dotenv
-from bs4 import BeautifulSoup
 import os
-import httpx
-import xmltodict
 import asyncio
 import threading
 import math
@@ -27,6 +25,7 @@ async def smart_search(lang, query, n_results):
     github_api = GithubAPI(GITHUB_ACCESS_TOKEN)
     gitverse_api = GitverseAPI(YC_FOLDER, YC_SECRET_KEY)
     gitlab_api = GitlabAPI(GITLAB_ACCESS_TOKEN)
+    moshub_api = MoshubAPI()
 
     en_queries = await generate_queries("en", query)
     en_keywords = await generate_keywords("en", en_queries)
@@ -37,6 +36,7 @@ async def smart_search(lang, query, n_results):
     github_repositories = []
     gitverse_repositories = []
     gitlab_repositories = []
+    moshub_repositories = []
     threads = []
     for i in range(min(len(en_keywords), len(ru_keywords))):
 
@@ -84,8 +84,31 @@ async def smart_search(lang, query, n_results):
         threads.append(_t)
         _t.start()
 
+        # Moshub
+        _t = threading.Thread(
+            target=asyncio.run,
+            args=(
+                moshub_api.search_repositories(
+                    query=ru_keywords[i],
+                    repos=moshub_repositories,
+                    n_repos = 5,
+                    lang=lang,
+                ),
+            ),
+            daemon=True,
+        )
+
+        threads.append(_t)
+        _t.start()
+
     for thread in threads:
         thread.join()
+
+    # print("GITVERSE:")
+    # print(gitverse_repositories)
+
+    # print("GITLAB:")
+    # print(gitlab_repositories)
 
     # readme_content and description are not necessary anymore
     for repo in github_repositories:
@@ -100,33 +123,57 @@ async def smart_search(lang, query, n_results):
         repo.pop("readme_content", None)
         repo.pop("description", None)
 
+    for repo in moshub_repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
+
     # get only the unique repositories from each version control
-    github_repositories=get_unique_repos(github_repositories)
-    gitverse_repositories=get_unique_repos(gitverse_repositories)
-    gitlab_repositories=get_unique_repos(gitlab_repositories)
+    github_repositories=get_unique_repos(github_repositories) if github_repositories else []
+    gitverse_repositories = get_unique_repos(
+        gitverse_repositories) if gitverse_repositories else []
+    gitlab_repositories = get_unique_repos(
+        gitlab_repositories) if gitlab_repositories else []
+    moshub_repositories = get_unique_repos(
+        moshub_repositories) if moshub_repositories else []
 
     final_result = []
 
     # Get top ranked github repositories
     if github_repositories:
+        print(f"Ranking {len(github_repositories) \
+                         } Github repositories based on their summaries...")
         ranked_github_repositories = rank_repositories(
-            query, github_repositories, math.floor(n_results * 0.5)
+            query, github_repositories, math.floor(n_results * 0.4)
         )
         final_result.append(ranked_github_repositories)
     
     # Get top ranked gitverse repositories
     if gitverse_repositories:
+        print(f"Ranking {len(gitverse_repositories) \
+                         } Gitverse repositories based on their summaries...")
         ranked_gitverse_repositories = rank_repositories(
             query, github_repositories, math.floor(n_results * 0.2)
         )
         final_result.append(ranked_gitverse_repositories)
 
-    # Get top ranked github repositories
-        if gitlab_repositories:
-            ranked_gitlab_repositories = rank_repositories(
-                query, github_repositories, math.floor(n_results * 0.3)
-            )
-            final_result.append(ranked_gitlab_repositories)
+    # Get top ranked gitlab repositories
+    if gitlab_repositories:
+        print(f"Ranking {len(gitlab_repositories) \
+                            } Gitlab repositories based on their summaries...")
+        ranked_gitlab_repositories = rank_repositories(
+            query, gitlab_repositories, math.floor(n_results * 0.2)
+        )
+        final_result.append(ranked_gitlab_repositories)
+    
+    # Get top ranked moshub repositories
+    if moshub_repositories:
+        print(f"Ranking {len(moshub_repositories) \
+                         } Moshub repositories based on their summaries...")
+        ranked_moshub_repositories = rank_repositories(
+            query, moshub_repositories, math.floor(n_results * 0.2)
+        )
+        final_result.append(ranked_moshub_repositories)
+
 
     if final_result:
         summary = await get_final_summary(ranked_repositories=final_result)
@@ -140,7 +187,15 @@ def get_unique_repos(repositories: list):
     done = set()
     result = []
     for repo in repositories:
-        if repo["url"] not in done:
-            done.add(repo["url"])
-            result.append(repo)
+        if "url" not in repo.keys():
+            print("HERE")
+            print(repo) 
+        try:
+            if repo["url"] not in done:
+                done.add(repo["url"])
+                result.append(repo)
+        except Exception as e:
+            print("Error at repo:")
+            print(repo)
+            print(e)
     return result

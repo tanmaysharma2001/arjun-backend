@@ -4,7 +4,6 @@ import numpy as np
 
 
 def rank_repositories(main_prompt, repositories, n_results=10):
-    print(f"Ranking {len(repositories)} repositories based on their summaries...")
     summaries = [repo['summary'] for repo in repositories]
 
     # Combine main prompt with summaries for TF-IDF vectorization

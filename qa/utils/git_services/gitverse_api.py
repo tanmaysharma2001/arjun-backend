@@ -62,8 +62,8 @@ class GitverseAPI():
 
             soup = BeautifulSoup(html_content, "html.parser")
 
-            # Get title
-            info["title"] = soup.findAll("h1")[0].text
+            # Get name
+            info["name"] = soup.findAll("h1")[0].text
 
             # Get forks
             forks_element = soup.find_all(string="Форк")[
@@ -123,7 +123,7 @@ class GitverseAPI():
         if repo_url is not None:
             try:
                 repo_info = await self.scrape_info(repo_url)
-                title = repo_info["title"]
+                repo_name = repo_info["name"]
                 forks = repo_info["forks"]
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
@@ -131,7 +131,7 @@ class GitverseAPI():
                 summary = await summarize(lang, readme_content, result.get("headline"))
                 results.append(
                     {
-                        "name": title,
+                        "name": repo_name,
                         "version_control": "gitverse",
                         "url": repo_url,
                         "forks": forks,

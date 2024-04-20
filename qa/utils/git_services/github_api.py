@@ -8,10 +8,9 @@ import urllib
 class GithubAPI():
 
     def __init__(self, access_token: str) -> None:
-        self.access_token = access_token
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {self.access_token}",
+            "Authorization": f"Bearer {access_token}",
         }
 
     async def process_result(self, result: dict, results: list, lang: str = "en") -> None:
