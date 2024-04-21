@@ -6,7 +6,7 @@ authors = ["pptx704 <rafeedm.bhuiyan@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 fastapi = {version = "^0.110.0", extras = ["uvicorn"]}
 serpapi = "^0.1.5"
 uvicorn = "^0.29.0"
