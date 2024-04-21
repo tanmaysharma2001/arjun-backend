@@ -1,0 +1,488 @@
+Name	AlternativeTo
+Godot	Unreal Engine (UE4), Unity3D
+Neovim	Sublime Text, VSCode Binaries
+Core	IFTTT, openHAB, Alexa, Google Home
+Netdata	Datadog, NewRelic
+Supabase	Firebase
+Rustdesk	TeamViewer
+Atom	Visual Studio Code, Sublime Text
+Grafana	Datadog, NewRelic
+Hoppscotch	Postman
+Strapi	Contentful
+Superset	Power BI, tableau, Qlik, MicroStrategy
+OBS Studio	Vmix
+Prometheus	Datadog
+Docusaurus	Archbee
+Traefik	Amazon API Gateway
+Appflowy	Notion
+Openpilot	Cruise, Tesla autopilot, Waymo
+Uptime Kuma	Uptime Robot
+Ghidra	IDA
+Mastodon	Facebook, Twitter
+Ghost	Medium, substack
+Gogs	GitHub, BitBucket, Upsource
+minio	Amazon S3
+MeiliSearch	Algolia, Telegram, Berty, Coyim, Session, Threema
+Joplin	Evernote, Onenote, Roam Research, Microsoft OneNote
+Gitea	GitHub, BitBucket, Upsource
+NocoDB	Airtable
+Huginn	Zapier, Make
+Discourse	Tribe, Circle
+Appwrite	Firebase
+n8n	Zapier, Make
+Rocket.Chat	Slack, Microsoft Teams, Discord
+Drawio	LucidChart
+Sentry	LogRocket
+Dbeaver	Toad
+Metabase	tableau, Data Studio
+Odoo	Salesforce, SAP
+ClickHouse	Amazon Redshift, BigQuery ML , Snowflake
+Insomnia	Postman
+Pocketbase	Firebase, AppWrite, Nhost, Supabase
+Photprism	Google photos
+Drone	Azure DevOps
+Appsmith	Retool, Powerapps, Appsheet
+Vault	1Password
+Jellyfin	Plex, Emby, Netflix
+Logseq	Roam Research
+Minikube	Docker Desktop
+Affine.pro	Notion
+Mattermost	Slack, Microsoft Teams, Discord
+Cal.com	Calendly
+InfluxDB	Kdb+
+ShareX	Lightshot
+Tooljet	Retool
+Penpot	Figma
+Dokku	Heroku, Render
+OpenBB Terminal	Bloomberg Terminal
+MPV	Windows media player
+NextCloud	Google Drive
+Directus	Contentful
+Trilium Notes	Evernote, Onenote, Roam Research
+Signal Android	WhatsApp
+Redash	Power BI, tableau, MicroStrategy, Qlik
+OpenFaas	Heroku, Render
+GitLab	GitHub, BitBucket, Upsource
+Outline	Notion, Confluence
+Vscodium	Sublime Text, VSCode Binaries
+Homebridge	Apple HomeKit
+Wiki.js	Markup, CMS, Documentation
+Filebrowser	Google Drive
+TDengine	Kdb+
+Dragonfly	Redis, Memcached
+Vuepress	Archbee
+Jenkins	Azure DevOps
+Medusa Commerce	Shopify, BigCommerce
+Responsively	Polypane
+Forem	Circle, Tribe
+LosslessCut	Adobe Premiere Pro
+Jitsi	Zoom, Skype
+Podman	Docker
+Parse-server	Firebase
+MindsDB	BigQuery ML , Google AutoML Tables
+Budibase	Retool, Powerapps
+Dgraph	Neo4j, TigerGraph, Amazon Neptune
+Saleor Commerce	Shopify, BigCommerce
+Jina.ai	Algolia
+Zulip	Slack, Microsoft Teams, Discord
+Sonic	Elasticsearch
+KeyCloak	Auth0
+Wekan	Trello
+Authelia	Auth0
+umami	Google Analytics
+Matomo	Google Analytics, Google Tag Manager
+Focalboard	Trello, Notion, Asana
+Headscale	Zerotier
+KeePassXC	1Password, LastPass
+chatwoot	Intercom
+Plausible Analytics	Google Analytics
+Goaccess	Google Analytics
+Typesense	Algolia
+FreeCAD	Onshape, Autodesk, SketchUp, TinkerCAD, Fusion360, SolidWorks, AutoCAD
+Cube.js	Looker
+Anki	Quizlet
+Nuclei	Tenable Nessus
+Qdrant	Algolia, Google Vertex AI
+Erpnext	Salesforce, SAP
+Brave Browser	Google Chrome, Microsoft Edge, Safari
+Signoz	Datadog, NewRelic
+MdBook	Gitbook
+TimescaleDB	Kdb+
+Zinc	Algolia
+PostHog	Amplitude
+Ntfy.sh	Pushbullet, Pushover
+Label Studio	Roboflow, ML Kit , Azure
+Paperless-ngx	Evernote, Maya
+Verdaccio	npm
+EtherPad	Google Docs, Typora
+RRweb	Hotjar, FullStory, LogRocket
+ThingsBoard	Google Cloud IoT Core, Datadog
+Mailspring	Gmail
+Beekeeper Studio	TablePlus
+ORY	Okta, Auth0
+Dub	Bitly
+Netbox	Men&Mice, Solarwinds, Infoblox, Device42
+Invidious	YouTube
+Postgres	MS SQL, Oracle Fusion ERP Cloud
+Prefect	Fivetran
+Bitwarden	1Password, LastPass
+Postal	Mailchimp, Sendinblue
+Firefly III	Quicken, YNAB
+Cachet	Uptime Robot
+Modulz	Figma
+Bookstack	Markup, CMS, Documentation, Atlassian Confluence
+Apisix	Apigee
+Airbyte	Fivetran
+ArangoDB	TigerGraph, Amazon Neptune
+QuestDB	Kdb+
+ceph	Amazon S3
+Listmonk	Mailchimp
+deepset	AWS Kendra, QnA Maker
+VLC	Windows media player
+Lemmy	Reddit
+Spree Commerce	Shopify, BigCommerce
+Peertube	YouTube
+OneDev	GitHub, BitBucket, Upsource
+Sumrat PDF Reader	Adobe Acrobat
+Neo4j	TigerGraph, Amazon Neptune
+Reaction Commerce	Shopify, BigCommerce
+Caprover	Heroku, Render
+Seafile	Google Drive
+Supertokens	Okta, Auth0
+Nuclear	Spotify
+MuseScore	Sibelius, Finale, Dorico
+Magento	Shopify, BigCommerce
+FreeTube	YouTube
+Blender	Maya, 3DS MAX, Adobe Substance
+Coolify	Heroku
+Tina	Contentful
+Element	Slack, Microsoft Teams, Discord
+VictoriaMetrics	Datadog, NewRelic
+ActivityWatch	RescueTime
+Cryptomator	Boxcryptor
+Vue Storefront	Shogun
+Illa	Retool, Powerapps, Appsheet
+YOURLS	Bitly
+Unleash	LaunchDarkly
+Xournalpp	Onenote
+Shotcut	Adobe Premiere Pro , DaVinci Resolve
+Bagisto	Shopify, BigCommerce
+Dagster	Fivetran
+Wallabag	Pocket
+Semgrep	Snyk
+Zettlr	Obsidian, Evernote, Notion, Scrivener
+Temporal	Zapier
+Misskey	Twitter
+Navidrome	Spotify
+Automa	UiPath, Zapier
+Pyroscope	Google Cloud
+Laverna	Typora, Evernote
+Filestash	Dropbox, Google Drive
+BlackHole	Spotify
+SeMI's Weaviate	Google Vertex AI, Algolia
+WooCommerce	Shopify, BigCommerce
+QGIS	ArcGIS
+nopCommerce	BigCommerce
+Gravitl	Taliscale
+Darktable	Adobe Lightroom
+OpenReplay	FullStory, LogRocket
+OpenSearch	Algolia, IBM Watson Discovery
+Portmaster	Glasswire, Comodo Firewall
+BigBlueButton	Zoom, Skype
+Uno	.Net Maui
+OwnCloud	Google Drive
+Organic Maps	Google Maps
+Windmill	Airplane.dev, Pipedream
+Notesnook	Evernote
+Pipedream	Zapier, Make
+OpenProject	Asana, Trello
+Kanboard	Trello
+Cortex	AWS SageMaker
+Netbird	Tailscale, NordVPN
+Manticoresearch	Elasticsearch
+Flynn	Heroku, Render
+Karate	Postman, Selenium
+Olive Editor	Adobe Premiere Pro
+PrestaShop	Shopify, BigCommerce, WooCommerce
+Sylius	Shopify, BigCommerce
+InvoiceNinja	Zoho
+CrowdSec	Greynoise
+Fathom Analytics	Google Analytics
+LMMS	FL Studio, Ableton
+Nhost	Firebase
+Akaunting	Quickbooks
+Aegis	LastPass
+Berty	WhatsApp, Telegram, Threema, Session, Coyim
+LBRY SDK	YouTube
+Opencart	Shopify
+Piped	YouTube
+Webiny	Contentful, Webflow
+Graylog	Splunk
+Sandstorm	Google Drive
+Searxng	Google Chrome
+Mautic	Mailchimp, ActiveCampaign
+Builder	Contentful
+Zitadel	Auth0, Okta
+Krita	Photoshop
+Dendron	Roam Research
+OpenSCAD	Autodesk, AutoCAD
+File Centipede	IDM, FDM, Ninja Download Manager
+HumHub	HCL Connections
+Flarum	Tribe, Circle
+Fonoster	Twilio
+Firezone	OpenVPN Access Server
+Grist	Airtable, Google Sheets, Excel
+Authentik	Auth0, Okta
+Pixelorama	Aseprite
+StackStorm	Rundeck, Ansible Tower, Salt
+Taiga	Trello
+PrivateBin	Pastebin
+LinkFree	LinkTree
+GDevelop	Unity3D, GameMaker
+LessPass	1Password, LastPass
+Papercups	Intercom, Zendesk
+Rowy	Airtable
+Quickwit	Elasticsearch, Splunk
+Cloudquery	AWS Config, GCP Cloud Asset inventory , AWS GuardDuty
+Countly	Google Analytics
+GrowthBook	LaunchDarkly
+Pixelfed	Instagram
+Flax Engine	Unity3D, Unreal Engine (UE4)
+Hanko	Auth0, Stytch
+Krayin	Suite CRM
+Lago	Stripe Billing
+Moodle	BlackBoard
+Buildbot	Azure DevOps
+Fosscord	Discord
+Formbricks	Typeform, Qualtrics, Sprig
+Vendure	Shopify, Ecwid
+Redmine	Jira, YouTrack
+JanusGraph	Neo4j
+UVDesk	Zendesk
+CryptPad	Google Docs, Office Online
+Isso	Disqus
+Gatus	Uptime Robot
+AppBase	Algolia
+Audiobookshelf	Ampache
+Standardnotes	Evernote, Onenote, Roam Research, Notion, Microsoft OneNote
+DoliCloud	Oracle Fusion ERP Cloud, Odoo, Microsoft Dynamics, Salesforce
+Raycast Extensions	Alfred
+Remark42	Disqus
+Tsuru	Heroku, Render
+pfSense	Sophos Firewall,  UniFi Security Gateway
+Hedgedoc	Google Docs, Office Online
+Typebot.io	Landbot, Typeform
+GIMP	Photoshop
+HeidiSQL	Toad
+Opentoonz	Adobe Animate, Pencil2D
+Passbolt	1Password
+Natron	DaVinci Resolve
+Apache nifi	Stackstrom, N8N
+ONLYOFFICE	Google Docs, Office Online
+ApostropheCMS 3	WordPress
+Ckan	Socrata
+Buttercup	1Password, LastPass
+Ackee	Google Analytics
+GoatCounter	Google Analytics
+Ant-Media-Server	Agora, Wowza, Twilio
+WriteFreely	Medium
+Porter	Heroku
+SuiteCRM	Salesforce, SAP
+Orchest	Fivetran, Azure AD
+Remotely	TeamViewer
+Mixxx	Traktor Pro 3
+Zammad	Zendesk
+Docuwiki	Confluence
+LeanTime	Asana
+Lobsters Rails Project	Reddit
+Space Cloud	Heroku
+RudderStack	Segment
+Plasmic	Contentful
+Jitsu	Segment
+Planka	Trello
+Fritzing	MultiSim, Proteus
+Commento	Disqus
+Automatisch	Zapier, Make
+Greenshot	Lightshot
+Boost Note	Notion
+FlagSmith	LaunchDarkly
+Clamav	McAfee
+Woodpecker	Drone CI
+Lineage OS	IOS
+Webstudio	Webflow
+Webmin	cPanel
+Erxes	HubSpot
+GoToSocial	Twitter
+Ploomber	AWS SageMaker
+LightDash	Looker
+crowd.dev	Common Room, Orbit
+Flipt	Rollout.io, LaunchDarkly
+MeshCentral	TeamViewer
+Pimcore	Akeneo, Salsify, Informatica
+Armorpaint	Substance Painter
+Flowchart.fun	LucidChart
+Solvespace	AutoCAD, Autodesk, Onshape, SketchUp
+Piwigo	Google photos
+Microweber	WIX
+Clickvote	Lyket.dev
+Hestia	cPanel
+Zilliz's Towhee	AWS SageMaker
+Rallly	Doodle
+Vesta	cPanel
+Opnsense	Sophos Firewall,  UniFi Security Gateway
+Storj	Amazon S3
+Apache Guacamole	TeamViewer
+Vanilla	Tribe, Circle
+chaskiq	Intercom
+Shynet	Google Analytics
+Kimai	Toggl Track
+Kdenlive	Adobe Premiere Pro , DaVinci Resolve
+OhMyForm	Typeform, GoogleForms
+BleachBit	CCleaner
+TerminusDb	TigerGraph, Amazon Neptune
+Fider	Canny
+Shopware	Shopify, Ecwid
+SwiftStack	Amazon S3
+Lowdefy	Retool
+FeatureBase	Imply, Pinot, MongoDB
+Padloc	1Password, LastPass
+MiroTalk P2P	Zoom, Google Meet
+LinkAce	Raindrop, Pocket
+Wire	Slack, Microsoft Teams, Discord
+LibreOffice	Microsoft Office
+Helpy	Zendesk
+Open Web Analytics	Google Analytics
+NodeTube	YouTube
+Cerbos	Okta, Auth0
+Papermerge	Docuware, ELO Office
+LibrePCB	MultiSim, Proteus
+Qovery	Heroku
+Picocrypt	Boxcryptor, Cryptomator
+Shuup	Shopify, Ecwid
+Wundergraph	Apollo GraphQL, Supabase, Hasura, Stepzen, Postgraphile
+Freeplane	Miro, XMind
+Inkscape	Adobe Illustrator
+AuthPass	1Password, LastPass
+Restyaboard	Trello
+Memgraph	TigerGraph, Amazon Neptune
+Silex	Webflow
+Revolt	Slack, Microsoft Teams, Discord
+Baserow	Airtable, Google Sheets
+Ballerine	SumSub
+NVDA	JAWS
+AVideo	YouTube
+Filegator	Wetransfer
+phpBB	Tribe, Circle
+Strut	Prezi
+Twake	Slack, Microsoft Teams, Discord
+Mirotalk	Zoom, Google Meet
+Myrtille	TeamViewer
+Movim	Facebook, Discord, Twitter, Slack
+Quant UX	Framer
+Sogo	Microsoft 365
+Fusio	Firebase
+Lokinet	WhatsApp, Telegram, Threema, Signal
+Cinny	Discord, Slack, Microsoft Teams
+Astuto	Canny
+Images.weserv.nl	ImgIX
+YetiForce CRM	Odoo, SuiteCRM, ZohoCRM, VtigerCRM, HubSpot, Salesforce, SAP
+Nexrender	Dataclay Templater Bot
+Sendportal	Mailchimp, Sendinblue
+Sozi	Prezi
+Colabora Online	Google Docs, Office Online
+Kalker	WolframAlpha
+BoxyHQ	WorkOS, FrontEgg
+Espocrm	Salesforce, ZohoCRM, Airtable
+Session	WhatsApp, Telegram, Berty, Coyim, Threema
+OpenScan	Adobe Scan, Microsoft Lens, CamScanner
+Kuzzle	Firebase
+refinery	Snorkel AI
+Friendica	Facebook
+Briefing	Zoom, Google Meet
+Matano	Splunk, Elasticsearch, Panther
+Soundux	Voicemod
+FeatBit	LaunchDarkly
+Peppermint	Zendesk
+Checkmk	Nagios, Zabbix, Prtg
+Corteza	Salesforce, SAP
+Lost Pixel	Chromatic, Percy
+Keila	Mailchimp, Sendinblue
+Tolgee	Lokalise, Crowdin, Phrase
+Exoframe	Vercel, Heroku
+Sulu	Contentful
+Milkman	Postman
+Dyrector	Heroku, Render
+MyBB	vBulletin, Xenforo
+VokoscreenNG	Bandicam
+Bangle-io	Notion, Evernote, Google Docs
+Tuleap	Jira
+KitchenOwl	Hungry, Bring
+Inlang	Lokalise, POEditor, Transifex
+Flyimg	ImgIX
+OpenOffice	Microsoft Office
+Samba	Google Drive
+Thelia	Shopify
+Cabal-desktop	Discord, Revoltchat, Element
+Pirsch	Google Analytics
+Scoold	Stack Overflow
+Offen	Google Analytics
+Testsigma	Selenium
+ActiveWorkflow	Zapier, Make
+Concrete	Contentful
+BoxBilling	WHMCS, Stripe Billing
+GrapheneOS	Google Camera
+Clipperz	1Password, LastPass
+Grouparoo	Hightouch
+rfbx	Unreal Engine (UE4), Unity3D
+Curiefense	AWS WAF
+Orangehrm	Oracle Peoplesoft
+OpenAM	Access Manager
+Bundlejs	Bundlephobia, Webpack, Esbuild, Rollup
+Unigraph	Roam Research, Logseq
+PeerPad	Typora, Google Docs
+Speek	WhatsApp, Telegram, Signal
+LogChimp	Canny
+Coyim	WhatsApp, Telegram, Threema, Session, Berty
+Graphite Docs	Google Docs, Office Online
+Kontalk	WhatsApp
+CiviCRM	Salesforce, SAP, HubSpot
+Aptabase	Firebase Analytics
+Ente.io	Google photos
+Sturdy	GitHub
+Modrinth	CurseForge
+Glimesh	Twitch
+MLCraft	Looker
+Shopaholic	Shopify, BigCommerce
+Sigle	Medium
+RoboCorp	UiPath
+Reflio	Rewardful
+Fief	Auth0, Okta
+StaticDeploy	Netlify
+ClassQuiz	Kahoot
+SchildiChat	WhatsApp, Discord
+Leaflet	Google Keep
+Hitobito	Salesforce, Microsoft Dynamics, Clubdesk, Fairgate
+Castled	Hightouch, NewRelic
+Argos CI	Percy
+Shoutify	SocialPilot, Hootsuite
+MetriQL	Looker
+Kukkee	Doodle
+ClearFlask	Canny
+PopSpace	Gather
+Okuna	Facebook
+Postmarket OS	IOS
+Snikket	WhatsApp
+Pagure	GitHub, BitBucket, Upsource
+RetroArcher.bundle	Plex
+Univention Corporate Server	Microsoft Active Directory
+Jam	ClubHouse
+Oso	Auth0
+Super Easy Forms	Typeform
+Passwordcockpit	1Password, LastPass
+Kindmetrics	Google Analytics
+Cloudogu EcoSystem	GitHub, BitBucket
+Wordle Global	Wordle
+Android	IOS
+Codeberg	GitHub, BitBucket, Upsource
+GlitchTip	LogRocket
+TigrisDB	MongoDB
