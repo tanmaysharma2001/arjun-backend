@@ -2,6 +2,7 @@ from qa.utils.git_services.github_api import GithubAPI
 from qa.utils.git_services.gitverse_api import GitverseAPI
 from qa.utils.git_services.gitlab_api import GitlabAPI
 from qa.utils.git_services.moshub_api import MoshubAPI
+from qa.utils.git_services.gitflame_api import GitFlameAPI
 from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
 from qa.utils.summarize import get_final_summary
@@ -26,6 +27,7 @@ async def smart_search(lang, query, n_results):
     gitverse_api = GitverseAPI(YC_FOLDER, YC_SECRET_KEY)
     gitlab_api = GitlabAPI(GITLAB_ACCESS_TOKEN)
     moshub_api = MoshubAPI()
+    gitflame_api = GitFlameAPI()
 
     en_queries = await generate_queries("en", query)
     en_keywords = await generate_keywords("en", en_queries)
@@ -37,6 +39,7 @@ async def smart_search(lang, query, n_results):
     gitverse_repositories = []
     gitlab_repositories = []
     moshub_repositories = []
+    gitflame_repositories = []
     threads = []
     for i in range(min(len(en_keywords), len(ru_keywords))):
 
@@ -44,10 +47,7 @@ async def smart_search(lang, query, n_results):
         _t = threading.Thread(
             target=asyncio.run,
             # Search in english only because github api doesn't provide good results for russian keywords
-            args=(
-                github_api.search_repositories(
-                    en_keywords[i], github_repositories, lang),
-            ),
+            args=(github_api.search_repositories(en_keywords[i], github_repositories, lang),),
             daemon=True,
         )
         threads.append(_t)
@@ -58,12 +58,12 @@ async def smart_search(lang, query, n_results):
             target=asyncio.run,
             args=(
                 gitverse_api.search_repositories(
-                    ru_keywords[i],
-                    gitverse_repositories,
-                    lang,
+                    query=ru_keywords[i],
+                    repos=gitverse_repositories,
+                    lang="ru"
                 ),
             ),
-            daemon=True,
+            daemon=True
         )
         threads.append(_t)
         _t.start()
@@ -73,12 +73,12 @@ async def smart_search(lang, query, n_results):
             target=asyncio.run,
             args=(
                 gitlab_api.search_repositories(
-                    en_keywords[i] if lang == "en" else ru_keywords[i],
-                    gitlab_repositories,
-                    lang,
+                    query=en_keywords[i] if lang == "en" else ru_keywords[i],
+                    repos=gitlab_repositories,
+                    lang=lang
                 ),
             ),
-            daemon=True,
+            daemon=True
         )
 
         threads.append(_t)
@@ -92,23 +92,35 @@ async def smart_search(lang, query, n_results):
                     query=ru_keywords[i],
                     repos=moshub_repositories,
                     n_repos = 5,
-                    lang=lang,
+                    lang=lang
                 ),
             ),
-            daemon=True,
+            daemon=True
         )
 
         threads.append(_t)
         _t.start()
 
+        # Gitflame
+        _t = threading.Thread(
+            target=asyncio.run,
+            args=(
+                gitflame_api.search_repositories(
+                    query=ru_keywords[i],
+                    results=gitflame_repositories,
+                    n_repos=5,
+                    lang=lang,
+                ),
+            ),
+            daemon=True
+        )
+
+        threads.append(_t)
+        _t.start()
+
+
     for thread in threads:
         thread.join()
-
-    # print("GITVERSE:")
-    # print(gitverse_repositories)
-
-    # print("GITLAB:")
-    # print(gitlab_repositories)
 
     # readme_content and description are not necessary anymore
     for repo in github_repositories:
@@ -127,54 +139,63 @@ async def smart_search(lang, query, n_results):
         repo.pop("readme_content", None)
         repo.pop("description", None)
 
-    # get only the unique repositories from each version control
-    github_repositories=get_unique_repos(github_repositories) if github_repositories else []
-    gitverse_repositories = get_unique_repos(
-        gitverse_repositories) if gitverse_repositories else []
-    gitlab_repositories = get_unique_repos(
-        gitlab_repositories) if gitlab_repositories else []
-    moshub_repositories = get_unique_repos(
-        moshub_repositories) if moshub_repositories else []
+    for repo in gitflame_repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
 
+    # get only the unique repositories from each version control, rank them and get the top repos
+    no_match_str = "Didn't find any matching repo for this query on "
     final_result = []
 
-    # Get top ranked github repositories
+
     if github_repositories:
-        print(f"Ranking {len(github_repositories) \
-                         } Github repositories based on their summaries...")
+        github_repositories = get_unique_repos(github_repositories)
+        print(f"Ranking {len(github_repositories)} Github repositories based on their summaries...")
         ranked_github_repositories = rank_repositories(
-            query, github_repositories, math.floor(n_results * 0.4)
-        )
+            query, github_repositories, math.floor(n_results * 0.4))
         final_result.append(ranked_github_repositories)
+    else:
+        print(no_match_str + "Github")
     
-    # Get top ranked gitverse repositories
     if gitverse_repositories:
-        print(f"Ranking {len(gitverse_repositories) \
-                         } Gitverse repositories based on their summaries...")
+        gitverse_repositories = get_unique_repos(gitverse_repositories)
+        print(f"Ranking {len(gitverse_repositories)} Gitverse repositories based on their summaries...")
         ranked_gitverse_repositories = rank_repositories(
-            query, github_repositories, math.floor(n_results * 0.2)
-        )
+            query, gitverse_repositories, math.floor(n_results * 0.2))
         final_result.append(ranked_gitverse_repositories)
+    else:
+        print(no_match_str + "Gitverse")
 
-    # Get top ranked gitlab repositories
     if gitlab_repositories:
-        print(f"Ranking {len(gitlab_repositories) \
-                            } Gitlab repositories based on their summaries...")
+        gitlab_repositories = get_unique_repos(
+            gitlab_repositories)
+        print(f"Ranking {len(gitlab_repositories)} Gitlab repositories based on their summaries...")
         ranked_gitlab_repositories = rank_repositories(
-            query, gitlab_repositories, math.floor(n_results * 0.2)
-        )
+            query, gitlab_repositories, math.floor(n_results * 0.2))
         final_result.append(ranked_gitlab_repositories)
-    
-    # Get top ranked moshub repositories
+    else:
+        print(no_match_str + "Gitlab")
+
     if moshub_repositories:
-        print(f"Ranking {len(moshub_repositories) \
-                         } Moshub repositories based on their summaries...")
+        moshub_repositories = get_unique_repos(
+            moshub_repositories)
+        print(f"Ranking {len(moshub_repositories)} Moshub repositories based on their summaries...")
         ranked_moshub_repositories = rank_repositories(
-            query, moshub_repositories, math.floor(n_results * 0.2)
-        )
+            query, moshub_repositories, math.floor(n_results * 0.1))
         final_result.append(ranked_moshub_repositories)
+    else:
+        print(no_match_str + "Moshub")
 
-
+    if gitflame_repositories:
+        gitflame_repositories = get_unique_repos(
+            gitflame_repositories)
+        print(f"Ranking {len(gitflame_repositories)} Gitflame repositories based on their summaries...")
+        ranked_gitflame_repositories = rank_repositories(
+            query, gitflame_repositories, math.floor(n_results * 0.1))
+        final_result.append(ranked_gitflame_repositories)
+    else:
+        print(no_match_str + "Gitflame")
+    
     if final_result:
         summary = await get_final_summary(ranked_repositories=final_result)
 
