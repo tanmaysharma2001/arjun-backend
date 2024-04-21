@@ -3,6 +3,9 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from auth.verify import Protected
 from qa.endpoints import router as qa_router
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
