@@ -9,10 +9,12 @@ import os
 
 
 class GitverseAPI():
-    def __init__(self):
+    def __init__(self, model:str):
         load_dotenv(find_dotenv())
         self.yc_folder = os.getenv("YC_FOLDER")
         self.yc_secret_key = os.getenv("YC_SECRET")
+        self.model = model
+
 
     async def search_repositories(self, query: str, repos: list, lang: str = "en"):
         url = "https://yandex.ru/search/xml"
@@ -109,8 +111,7 @@ class GitverseAPI():
         md_variations = ["md", "MD"]
         for branch in possible_branch_names:
             for md_variation in md_variations:
-                gitverse_repo_readme_url = f"https://gitverse.ru/api/repos/{
-                    gitverse_repo_full_name}/raw/branch/{branch}/README.{md_variation}"
+                gitverse_repo_readme_url = f"https://gitverse.ru/api/repos/{gitverse_repo_full_name}/raw/branch/{branch}/README.{md_variation}"
                 async with httpx.AsyncClient() as client:
                     response = await client.get(gitverse_repo_readme_url)
                 if response.status_code == 400:
@@ -143,7 +144,7 @@ class GitverseAPI():
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
                 description = yandex_search_result.get("headline")
-                summary = await summarize(lang, readme_content, description)
+                summary = await summarize(lang, readme_content, description, model=self.model)
                 results.append(
                     {
                         "name": repo_name,

@@ -1,32 +1,17 @@
-import requests
+from openai import OpenAI
 
-def get_readme_content(full_name):
-    """
-    Fetches the README content of the specified GitHub repository.
+client = OpenAI(
+    base_url = 'http://188.130.155.82:11434/v1',
+    api_key='ollama',
+)
 
-    Args:
-    - full_name (str): The full name of the repository (e.g., "owner/repo").
-
-    Returns:
-    - str: The content of the README file, or an error message if the request fails.
-    """
-    url = f"https://api.github.com/repos/{full_name}/readme"
-    github_token = "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"
-    headers = {
-        "Accept": "application/vnd.github.v3.raw+json",  # Get the raw README content
-        # Optional: For higher rate limit and private repos
-        "Authorization": f"token {github_token}"
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        return response.text  # Raw README content
-    else:
-        return "README not found or access denied."
-    
-    
-lol = get_readme_content("erenavsarogullari/OTV_Spring_Integration_Message_Processing")
-
-
-lol
-    
-    
+response = client.chat.completions.create(
+  model="llama3:70b",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Who won the world series in 2020?"},
+    {"role": "assistant", "content": "The LA Dodgers won in 2020."},
+    {"role": "user", "content": "Where was it played?"}
+  ]
+)
+print(response.choices[0].message.content)

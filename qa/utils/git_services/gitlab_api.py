@@ -6,9 +6,10 @@ from dotenv import load_dotenv, find_dotenv
 import os
 class GitlabAPI():
 
-    def __init__(self) -> None:
+    def __init__(self, model: str) -> None:
         load_dotenv(find_dotenv())
         self.gl = gitlab.Gitlab('https://gitlab.com', private_token=os.environ["GITLAB_ACCESS_TOKEN"])
+        self.model = model
 
     async def process_result(self, project, results: list, lang: str = "en") -> None:
         project_name = project["name"]
@@ -21,7 +22,7 @@ class GitlabAPI():
             project_readme_content = project_description
 
         # TODO
-        summary = await summarize(lang, project_readme_content, project_description)
+        summary = await summarize(lang, project_readme_content, project_description,  model=self.model)
 
         results.append({
             "name": project_name,
@@ -83,7 +84,7 @@ class GitlabAPI():
             if readme_content == "README not found or access denied.":
                 readme_content = repo_description
 
-            summary = await summarize(lang=lang, readme_content=readme_content, description=repo_description)
+            summary = await summarize(lang=lang, readme_content=readme_content, description=repo_description, model=self.model)
             info = {
                 'name': project.name,
                 'version_control': 'gitlab',

@@ -8,8 +8,9 @@ from qa.utils.summarize import summarize
 
 
 class GitFlameAPI():
-    def __init__(self) -> None:
+    def __init__(self, model:str) -> None:
         self.api_url = "https://gitflame.ru/api/v1/repos"
+        self.model = model
 
     async def search_repositories(self, query: str, results: list, n_repos: int, lang: str = "ru") -> list:
         try:
@@ -61,8 +62,7 @@ class GitFlameAPI():
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
             return readme.content.decode()
-        print(f"Can not find readme.md for gitflame for this link: {
-              readme_url}")
+        print(f"Can not find readme.md for gitflame for this link: {readme_url}")
         return ""
 
     async def scrape_info(self, repo_data_dict: dict) -> dict:
@@ -97,7 +97,7 @@ class GitFlameAPI():
         repo_readme_content = info.get(
             "readme_content", "There is no README for this repo")
 
-        summary = await summarize(lang, repo_readme_content, repo_description)
+        summary = await summarize(lang, repo_readme_content, repo_description,self.model)
 
         results.append(
             {
@@ -124,7 +124,7 @@ class GitFlameAPI():
                 readme_content = repo_readme_content
                 break
 
-        summary = await summarize(lang, readme_content, repo_description)
+        summary = await summarize(lang, readme_content, repo_description,self.model)
 
         info = {
             "name": repo_name,

@@ -3,3 +3,6 @@ uvicorn[standard]
 openai
 xmltodict
 python-gitlab
+BeautifulSoup4
+scikit-learn
+supabase

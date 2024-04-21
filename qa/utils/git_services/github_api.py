@@ -8,12 +8,13 @@ import os
 
 class GithubAPI():
 
-    def __init__(self) -> None:
+    def __init__(self,model:str) -> None:
         load_dotenv(find_dotenv())
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {os.environ["GITHUB_ACCESS_TOKEN"]}",
+            "Authorization": f"Bearer {os.environ['GITHUB_ACCESS_TOKEN']}"
         }
+        self.model = model
 
     async def process_result(self, result: dict, results: list, lang: str = "en") -> None:
         repo_name = result["name"]
@@ -26,7 +27,7 @@ class GithubAPI():
             repo_readme_content = "There is no README for this repo"
 
         # TODO
-        summary = await summarize(lang, repo_readme_content, repo_description)
+        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         results.append(
             {
@@ -67,7 +68,7 @@ class GithubAPI():
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.get(search_url, headers=self.headers, params=params)
-                data = response.json()
+                data = response.json()[:10]
 
             repositories = []
             threads = []
@@ -121,7 +122,7 @@ class GithubAPI():
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
 
-        summary = await summarize(lang, repo_readme_content, repo_description)
+        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         return {
             "name": repo_name,

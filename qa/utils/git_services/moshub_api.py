@@ -8,6 +8,10 @@ from qa.utils.summarize import summarize
 
 
 class MoshubAPI():
+    def __init__(self, model:str):
+        self.model = model
+
+
     async def search_repositories(self, query: str, repos: list, n_repos: int, lang: str = "ru") -> list:
         try:
             url = "https://hub.mos.ru/explore/projects" + "?name=" + \
@@ -80,7 +84,7 @@ class MoshubAPI():
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
             return readme.content.decode()
-        print(f"Can not find readme.md for moshub for this link: {readme_url}")
+        print(f"Can not find readme.md for gitverse for this link: {readme_url}")
         return ""
 
     def get_readme_urls(self, owner_name: str, repo_name: str, ) -> typing.List[str]:
@@ -111,7 +115,7 @@ class MoshubAPI():
         repo_readme_content = info.get(
             "readme_content", "There is no README for this repo")
 
-        summary = await summarize(lang, repo_readme_content, repo_description)
+        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         results.append(
             {
