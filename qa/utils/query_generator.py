@@ -33,7 +33,7 @@ async def generate_queries(lang, query, model):
         return queries["queries"]
     else:
 
-        client = AsyncOpenAI(base_url = 'https://f5hf9coai8ho17-11434.proxy.runpod.net/v1',api_key='ollama',timeout=120)
+        client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
         print(model)
 
         response = await client.chat.completions.create(

@@ -39,7 +39,7 @@ async def summarize(lang, readme_content, description, model):
         return summary["summary"]
 
     else:
-        client = AsyncOpenAI(base_url = 'https://f5hf9coai8ho17-11434.proxy.runpod.net/v1',api_key='ollama',timeout=120)
+        client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
         print(model)
 
         response = await client.chat.completions.create(
@@ -90,7 +90,7 @@ async def get_final_summary(ranked_repositories, model):
     else:
 
 
-        client = AsyncOpenAI(base_url = 'https://f5hf9coai8ho17-11434.proxy.runpod.net/v1',api_key='ollama',timeout=120)
+        client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
         print(model)
 
 
