@@ -2,13 +2,13 @@ import gitlab
 import asyncio
 import threading
 from qa.utils.summarize import summarize
-
-
+from dotenv import load_dotenv, find_dotenv
+import os
 class GitlabAPI():
 
-    def __init__(self, token: str) -> None:
-        self.token = token
-        self.gl = gitlab.Gitlab('https://gitlab.com', private_token=self.token)
+    def __init__(self) -> None:
+        load_dotenv(find_dotenv())
+        self.gl = gitlab.Gitlab('https://gitlab.com', private_token=os.environ["GITLAB_ACCESS_TOKEN"])
 
     async def process_result(self, project, results: list, lang: str = "en") -> None:
         project_name = project["name"]
@@ -39,8 +39,8 @@ class GitlabAPI():
         page = 1
         search_results = self.gl.search(
             scope=gitlab.const.SearchScope.PROJECTS,
-            search=query, 
-            page=page, 
+            search=query,
+            page=page,
             per_page=per_page)
 
         threads = []
@@ -70,3 +70,31 @@ class GitlabAPI():
         project_id = project_url.split('/')[-1]
         project = self.gl.projects.get(project_id)
         return project.attributes
+
+    async def get_repo_info(self, repo_url: str, lang="en"):
+        project_path = repo_url.split(
+            'gitlab.com/')[1] if 'gitlab.com/' in repo_url else repo_url
+
+        try:
+            project = self.gl.projects.get(project_path)
+
+            repo_description = project.description
+            readme_content = await self.get_readme_content(project.id)
+            if readme_content == "README not found or access denied.":
+                readme_content = repo_description
+
+            summary = await summarize(lang=lang, readme_content=readme_content, description=repo_description)
+            info = {
+                'name': project.name,
+                'version_control': 'gitlab',
+                'url': repo_url,
+                'stars': project.star_count,
+                'forks': project.forks_count,
+                'summary': summary
+            }
+
+            return info
+
+        except Exception as e:
+            print("Error while fetching gitlab repo info: ", e)
+            return str(e)

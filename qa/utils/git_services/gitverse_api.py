@@ -4,13 +4,15 @@ import xmltodict
 import asyncio
 import threading
 from qa.utils.summarize import summarize
+from dotenv import load_dotenv, find_dotenv
+import os
 
 
 class GitverseAPI():
-    def __init__(self, yc_folder, yc_secret_key):
-        self.yc_folder = yc_folder
-        self.yc_secret_key = yc_secret_key
-
+    def __init__(self):
+        load_dotenv(find_dotenv())
+        self.yc_folder = os.getenv("YC_FOLDER")
+        self.yc_secret_key = os.getenv("YC_SECRET")
 
     async def search_repositories(self, query: str, repos: list, lang: str = "en"):
         url = "https://yandex.ru/search/xml"
@@ -79,6 +81,18 @@ class GitverseAPI():
 
             info["readme_content"] = await self.get_readme_content(gitverse_repo_url)
 
+            h4_tag = soup.find('h4', class_='text-h4')
+
+            # Since the <p> tag follows <h4>, you can use .find_next() to get the next <p> tag
+            if h4_tag:
+                p_tag = h4_tag.find_next('p')
+                if p_tag:
+                    info["description"] = p_tag.text
+                else:
+                    info["description"] = ""
+            else:
+                info["description"] = ""
+
         except Exception as e:
             raise e
 
@@ -87,14 +101,15 @@ class GitverseAPI():
     async def get_readme_content(self, gitverse_repo_url: str) -> str:
 
         gitverse_repo_full_name = (
-            gitverse_repo_url.split("/")[3] + "/" + gitverse_repo_url.split("/")[4]
+            gitverse_repo_url.split(
+                "/")[3] + "/" + gitverse_repo_url.split("/")[4]
         )
         readme_content = "no readme"
         possible_branch_names = ["master", "main"]
         md_variations = ["md", "MD"]
         for branch in possible_branch_names:
             for md_variation in md_variations:
-                gitverse_repo_readme_url = f"https://gitverse.ru/api/repos/{ \
+                gitverse_repo_readme_url = f"https://gitverse.ru/api/repos/{
                     gitverse_repo_full_name}/raw/branch/{branch}/README.{md_variation}"
                 async with httpx.AsyncClient() as client:
                     response = await client.get(gitverse_repo_readme_url)
@@ -116,9 +131,9 @@ class GitverseAPI():
             return None
 
     async def process_result(
-            self, result: dict, results: list, lang: str = "en"
-        ) -> None:
-        repo_url = await self.extract_repo_url(result["url"])
+        self, yandex_search_result: dict, results: list, lang: str = "ru"
+    ) -> None:
+        repo_url = await self.extract_repo_url(yandex_search_result["url"])
 
         if repo_url is not None:
             try:
@@ -127,8 +142,8 @@ class GitverseAPI():
                 forks = repo_info["forks"]
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
-
-                summary = await summarize(lang, readme_content, result.get("headline"))
+                description = yandex_search_result.get("headline")
+                summary = await summarize(lang, readme_content, description)
                 results.append(
                     {
                         "name": repo_name,
@@ -136,10 +151,33 @@ class GitverseAPI():
                         "url": repo_url,
                         "forks": forks,
                         "stars": stars,
-                        "description": result.get("headline"),
+                        "description": description,
                         "readme_content": readme_content,
                         "summary": summary,
                     }
                 )
             except Exception as e:
                 print(f"Error occurred while scraping {repo_url}. Details:", e)
+
+    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
+        data = await self.scrape_info(repo_url)
+
+        repo_name = data["name"]
+        repo_forks = data["forks"]
+        repo_stars = data["stars"]
+        repo_description = data["description"]
+        repo_readme_content = await self.get_readme_content(repo_url)
+        if repo_readme_content == "README not found or access denied.":
+            repo_readme_content = "There is no README for this repo"
+
+        summary = await summarize(lang, repo_readme_content, repo_description)
+
+        info = {
+            "name": repo_name,
+            "version_control": "gitverse",
+            "url": repo_url,
+            "forks": repo_forks,
+            "stars": repo_stars,
+            "summary": summary,
+        }
+        return info

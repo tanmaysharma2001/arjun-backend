@@ -8,6 +8,8 @@ from qa.utils.summarize import summarize
 
 
 class GitFlameAPI():
+    def __init__(self) -> None:
+        self.api_url = "https://gitflame.ru/api/v1/repos"
 
     async def search_repositories(self, query: str, results: list, n_repos: int, lang: str = "ru") -> list:
         try:
@@ -44,20 +46,14 @@ class GitFlameAPI():
             return []
 
     def search_url(self) -> str:
-        return "https://gitflame.ru/api/v1/repos" + "/search"
+        return self.api_url + "/search"
 
-    def get_readme_urls(self, repo_link: str) -> typing.List[str]:
-        prefix = f"{repo_link}/raw//"
+    def get_readme_urls(self, owner: str, repo_name: str) -> typing.List[str]:
+        prefix = f"{self.api_url}/{owner}/{repo_name}/raw//"
         return [
-            prefix + "main/README.md",
-            prefix + "main/readme.md",
-            prefix + "main/ReadMe.md",
-            prefix + "master/README.md",
-            prefix + "master/readme.md",
-            prefix + "master/ReadMe.md",
-            prefix + "dev/readme.md",
-            prefix + "dev/README.md",
-            prefix + "dev/ReadMe.md",
+            prefix + "README.md",
+            prefix + "readme.md",
+            prefix + "ReadMe.md",
         ]
 
     async def get_readme_content(self, readme_url: str) -> str:
@@ -79,7 +75,7 @@ class GitFlameAPI():
 
         info["repo_owner"] = repo_data_dict["owner"]["username"]
 
-        for possible_readme_url in self.get_readme_urls(repo_link=info["repo_url"]):
+        for possible_readme_url in self.get_readme_urls(owner=info["repo_owner"], repo_name=info["repo_name"]):
             repo_readme_content = await self.get_readme_content(possible_readme_url)
             if repo_readme_content != "":
                 info["readme_content"] = repo_readme_content
@@ -116,3 +112,27 @@ class GitFlameAPI():
                 "summary": summary,
             }
         )
+
+    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
+        repo_name = repo_url.split("/")[4]
+        repo_owner = repo_url.split("/")[3]
+        repo_description = ""
+        readme_content = ""
+        for possible_readme_url in self.get_readme_urls(repo_name=repo_name, owner=repo_owner):
+            repo_readme_content = await self.get_readme_content(possible_readme_url)
+            if repo_readme_content != "":
+                readme_content = repo_readme_content
+                break
+
+        summary = await summarize(lang, readme_content, repo_description)
+
+        info = {
+            "name": repo_name,
+            "version_control": "gitflame",
+            "url": repo_url,
+            "forks": 0,
+            "stars": 0,
+            "summary": summary,
+        }
+
+        return info

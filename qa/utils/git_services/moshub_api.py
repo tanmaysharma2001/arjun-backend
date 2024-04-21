@@ -16,7 +16,6 @@ class MoshubAPI():
             soup = BeautifulSoup(response.content, 'html.parser')
 
             n_found_repos = len(soup.find_all('li', class_='project-row'))
-            print(n_found_repos)
             repos_elements = soup.find_all(
                 'li', class_='project-row')[:min(n_repos, n_found_repos)]
 
@@ -81,8 +80,7 @@ class MoshubAPI():
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
             return readme.content.decode()
-        print(f"Can not find readme.md for gitverse for this link: {
-              readme_url}")
+        print(f"Can not find readme.md for moshub for this link: {readme_url}")
         return ""
 
     def get_readme_urls(self, owner_name: str, repo_name: str, ) -> typing.List[str]:
@@ -107,10 +105,11 @@ class MoshubAPI():
         repo_name = info["repo_name"]
         repo_url = info["repo_url"]
         repo_owner = info["repo_owner"]
-        repo_forks = ""
+        repo_forks = 0
         repo_stars = info["star_count"]
         repo_description = ""
-        repo_readme_content = info.get("readme_content", "There is no README for this repo")
+        repo_readme_content = info.get(
+            "readme_content", "There is no README for this repo")
 
         summary = await summarize(lang, repo_readme_content, repo_description)
 
@@ -127,3 +126,23 @@ class MoshubAPI():
                 "summary": summary,
             }
         )
+
+    async def get_repo_info(self, repo_url: str, lang="ru") -> dict:
+        scraped_info = await self.scrape_info(repo_url)
+
+        repo_name = scraped_info["repo_name"]
+        repo_url = scraped_info["repo_url"]
+        repo_forks = 0
+        repo_stars = scraped_info["star_count"]
+        readme_content = scraped_info["readme_content"]
+        summary = await summarize(lang=lang, readme_content=readme_content, description="")
+        info = {
+            "name": repo_name,
+            "version_control": "moshub",
+            "url": repo_url,
+            "forks": repo_forks,
+            "stars": repo_stars,
+            "summary": summary,
+        }
+
+        return info

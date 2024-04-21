@@ -7,25 +7,14 @@ from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
 from qa.utils.summarize import get_final_summary
 from qa.utils.rank import rank_repositories
-from dotenv import load_dotenv, find_dotenv
-import os
 import asyncio
 import threading
 import math
 
-YC_FOLDER = os.getenv("YC_FOLDER")
-YC_SECRET_KEY = os.getenv("YC_SECRET")
-
-load_dotenv(find_dotenv())
-
-GITHUB_ACCESS_TOKEN = os.environ["GITHUB_ACCESS_TOKEN"]
-GITLAB_ACCESS_TOKEN = os.environ["GITLAB_ACCESS_TOKEN"]
-
-
 async def smart_search(lang, query, n_results):
-    github_api = GithubAPI(GITHUB_ACCESS_TOKEN)
-    gitverse_api = GitverseAPI(YC_FOLDER, YC_SECRET_KEY)
-    gitlab_api = GitlabAPI(GITLAB_ACCESS_TOKEN)
+    github_api = GithubAPI()
+    gitverse_api = GitverseAPI()
+    gitlab_api = GitlabAPI()
     moshub_api = MoshubAPI()
     gitflame_api = GitFlameAPI()
 

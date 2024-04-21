@@ -3,14 +3,16 @@ import httpx
 import asyncio
 import threading
 import urllib
-
+from dotenv import load_dotenv, find_dotenv
+import os
 
 class GithubAPI():
 
-    def __init__(self, access_token: str) -> None:
+    def __init__(self) -> None:
+        load_dotenv(find_dotenv())
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {access_token}",
+            "Authorization": f"Bearer {os.environ["GITHUB_ACCESS_TOKEN"]}",
         }
 
     async def process_result(self, result: dict, results: list, lang: str = "en") -> None:
@@ -44,7 +46,7 @@ class GithubAPI():
 
         print(query)
 
-        url = "https://api.github.com/search/repositories"
+        search_url = "https://api.github.com/search/repositories"
         stars = "100"
         license = "mit"
         forks = "100"
@@ -64,7 +66,7 @@ class GithubAPI():
 
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(url, headers=self.headers, params=params)
+                response = await client.get(search_url, headers=self.headers, params=params)
                 data = response.json()
 
             repositories = []
@@ -97,7 +99,7 @@ class GithubAPI():
             return "README not found or access denied."
 
 
-    async def get_repo_info(self, repo_url: str) -> dict:
+    async def get_repo_info(self, repo_url: str, lang:str) -> dict:
         # extract the owner and repo name
         url = urllib.parse.urlparse(repo_url)
         path = url.path.split("/")
@@ -109,4 +111,23 @@ class GithubAPI():
         async with httpx.AsyncClient(timeout=10) as client:
             response = await client.get(api_url)
             data = response.json()
-        return data
+        
+        repo_name = data["name"]
+        repo_url = data["html_url"]
+        repo_forks = data["forks_count"]
+        repo_stars = data["stargazers_count"]
+        repo_description = data["description"]
+        repo_readme_content = await self.get_readme_content(data["full_name"])
+        if repo_readme_content == "README not found or access denied.":
+            repo_readme_content = "There is no README for this repo"
+
+        summary = await summarize(lang, repo_readme_content, repo_description)
+
+        return {
+            "name": repo_name,
+            "version_control": "github",
+            "url": repo_url,
+            "forks": repo_forks,
+            "stars": repo_stars,
+            "summary": summary,
+        }
