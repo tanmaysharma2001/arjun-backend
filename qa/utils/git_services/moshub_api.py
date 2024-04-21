@@ -110,7 +110,7 @@ class MoshubAPI():
         repo_forks = ""
         repo_stars = info["star_count"]
         repo_description = ""
-        repo_readme_content = info["readme_content"]
+        repo_readme_content = info.get("readme_content", "There is no README for this repo")
 
         summary = await summarize(lang, repo_readme_content, repo_description)
 

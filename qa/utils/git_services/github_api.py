@@ -21,7 +21,7 @@ class GithubAPI():
         repo_description = result["description"]
         repo_readme_content = await self.get_readme_content(result["full_name"])
         if repo_readme_content == "README not found or access denied.":
-            repo_readme_content = repo_description
+            repo_readme_content = "There is no README for this repo"
 
         # TODO
         summary = await summarize(lang, repo_readme_content, repo_description)

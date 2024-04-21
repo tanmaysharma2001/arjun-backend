@@ -35,4 +35,6 @@ async def generate_keywords(lang, queries):
         
         keywords = json.loads(response.choices[0].message.content)
         keyword_list.extend(keywords["keywords"])
+    
+    print(f"Keywords: {keyword_list}")
     return keyword_list
