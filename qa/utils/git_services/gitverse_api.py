@@ -9,7 +9,7 @@ import os
 
 
 class GitverseAPI():
-    def __init__(self, model:str):
+    def __init__(self, model:str = "openai"):
         load_dotenv(find_dotenv())
         self.yc_folder = os.getenv("YC_FOLDER")
         self.yc_secret_key = os.getenv("YC_SECRET")
@@ -82,6 +82,7 @@ class GitverseAPI():
             info["stars"] = stars
 
             info["readme_content"] = await self.get_readme_content(gitverse_repo_url)
+            info['license'] = ""
 
             h4_tag = soup.find('h4', class_='text-h4')
 
@@ -152,6 +153,7 @@ class GitverseAPI():
                         "url": repo_url,
                         "forks": forks,
                         "stars": stars,
+                        "license": repo_info['license'],
                         "description": description,
                         "readme_content": readme_content,
                         "summary": summary,
@@ -162,7 +164,7 @@ class GitverseAPI():
 
     async def get_repo_info(self, repo_url: str, lang: str) -> dict:
         data = await self.scrape_info(repo_url)
-
+        repo_license = data['license']
         repo_name = data["name"]
         repo_forks = data["forks"]
         repo_stars = data["stars"]
@@ -171,7 +173,7 @@ class GitverseAPI():
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
 
-        summary = await summarize(lang, repo_readme_content, repo_description)
+        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         info = {
             "name": repo_name,
@@ -179,6 +181,7 @@ class GitverseAPI():
             "url": repo_url,
             "forks": repo_forks,
             "stars": repo_stars,
+            "licence": repo_license,
             "summary": summary,
         }
         return info

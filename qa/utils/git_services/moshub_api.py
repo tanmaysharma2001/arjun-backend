@@ -8,7 +8,7 @@ from qa.utils.summarize import summarize
 
 
 class MoshubAPI():
-    def __init__(self, model:str):
+    def __init__(self, model:str = "openai") -> None:
         self.model = model
 
 

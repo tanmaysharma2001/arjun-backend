@@ -8,7 +8,7 @@ from qa.utils.summarize import summarize
 
 
 class GitFlameAPI():
-    def __init__(self, model:str) -> None:
+    def __init__(self, model:str = "openai"):
         self.api_url = "https://gitflame.ru/api/v1/repos"
         self.model = model
 
@@ -84,6 +84,7 @@ class GitFlameAPI():
         info["description"] = repo_data_dict["description"]
         info["stars_count"] = repo_data_dict["stars_count"]
         info["forks_count"] = repo_data_dict["forks_count"]
+        info['licence'] = repo_data_dict['licence']
 
         return info
 
@@ -93,6 +94,7 @@ class GitFlameAPI():
         repo_owner = info["repo_owner"]
         repo_forks = info["forks_count"]
         repo_stars = info["stars_count"]
+        repo_licence = info['licence']
         repo_description = info["description"] if info["description"] != "" else "There is no description for this repo"
         repo_readme_content = info.get(
             "readme_content", "There is no README for this repo")
@@ -107,6 +109,7 @@ class GitFlameAPI():
                 "url": repo_url,
                 "forks": repo_forks,
                 "stars": repo_stars,
+                "licence": repo_licence,
                 "description": repo_description,
                 "readme_content": repo_readme_content,
                 "summary": summary,
@@ -133,6 +136,7 @@ class GitFlameAPI():
             "forks": 0,
             "stars": 0,
             "summary": summary,
+            "licence": "",
         }
 
         return info

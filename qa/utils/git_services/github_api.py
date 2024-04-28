@@ -8,7 +8,7 @@ import os
 
 class GithubAPI():
 
-    def __init__(self,model:str) -> None:
+    def __init__(self,model:str = "openai") -> None:
         load_dotenv(find_dotenv())
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
@@ -114,10 +114,12 @@ class GithubAPI():
             data = response.json()
         
         repo_name = data["name"]
+        print(data)
         repo_url = data["html_url"]
         repo_forks = data["forks_count"]
         repo_stars = data["stargazers_count"]
         repo_description = data["description"]
+        repo_license = data["license"]
         repo_readme_content = await self.get_readme_content(data["full_name"])
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
@@ -130,5 +132,6 @@ class GithubAPI():
             "url": repo_url,
             "forks": repo_forks,
             "stars": repo_stars,
+            "license": repo_license,
             "summary": summary,
         }
