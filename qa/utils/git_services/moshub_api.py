@@ -58,6 +58,8 @@ class MoshubAPI():
 
         info["repo_name"] = self.get_repo_name(info["repo_url"])
 
+        info["license"] = None
+
         info["repo_owner"] = self.get_owner_name(info["repo_url"])
 
         for possible_readme_url in self.get_readme_urls(owner_name=info["repo_owner"], repo_name=info["repo_name"]):
@@ -147,7 +149,8 @@ class MoshubAPI():
             "forks": repo_forks,
             "stars": repo_stars,
             "summary": summary,
-            "contributors": contributors
+            "contributors": contributors,
+            "licence": scraped_info["license"],
         }
 
         return info
