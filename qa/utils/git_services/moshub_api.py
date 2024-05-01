@@ -133,7 +133,7 @@ class MoshubAPI():
 
     async def get_repo_info(self, repo_url: str, lang="ru") -> dict:
         scraped_info = await self.scrape_info(repo_url)
-
+        contributors = scraped_info["repo_owner"]
         repo_name = scraped_info["repo_name"]
         repo_url = scraped_info["repo_url"]
         repo_forks = 0
@@ -147,6 +147,7 @@ class MoshubAPI():
             "forks": repo_forks,
             "stars": repo_stars,
             "summary": summary,
+            "contributors": contributors
         }
 
         return info

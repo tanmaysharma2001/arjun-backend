@@ -83,6 +83,7 @@ class GitverseAPI():
 
             info["readme_content"] = await self.get_readme_content(gitverse_repo_url)
             info['license'] = ""
+            info['contributors'] = [gitverse_repo_url.split('/')[3]]
 
             h4_tag = soup.find('h4', class_='text-h4')
 
@@ -145,6 +146,7 @@ class GitverseAPI():
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
                 description = yandex_search_result.get("headline")
+                contributors = repo_info.get("contributors", [])
                 summary = await summarize(lang, readme_content, description, model=self.model)
                 results.append(
                     {
@@ -156,6 +158,7 @@ class GitverseAPI():
                         "license": repo_info['license'],
                         "description": description,
                         "readme_content": readme_content,
+                        'contributors': contributors,
                         "summary": summary,
                     }
                 )
@@ -168,6 +171,7 @@ class GitverseAPI():
         repo_name = data["name"]
         repo_forks = data["forks"]
         repo_stars = data["stars"]
+        repo_contributors = data['contributors']
         repo_description = data["description"]
         repo_readme_content = await self.get_readme_content(repo_url)
         if repo_readme_content == "README not found or access denied.":
@@ -183,5 +187,6 @@ class GitverseAPI():
             "stars": repo_stars,
             "licence": repo_license,
             "summary": summary,
+            "contributors" : repo_contributors,
         }
         return info

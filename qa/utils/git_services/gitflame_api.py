@@ -27,6 +27,7 @@ class GitFlameAPI():
             threads = []
 
             for repo_data_dict in repositories.json():
+                print(repo_data_dict)
                 scraped_info = await self.scrape_info(repo_data_dict=repo_data_dict)
 
                 _t = threading.Thread(
@@ -133,6 +134,7 @@ class GitFlameAPI():
             "name": repo_name,
             "version_control": "gitflame",
             "url": repo_url,
+            "contributors" : [repo_owner],
             "forks": 0,
             "stars": 0,
             "summary": summary,

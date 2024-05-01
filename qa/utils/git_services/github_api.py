@@ -119,10 +119,18 @@ class GithubAPI():
         repo_forks = data["forks_count"]
         repo_stars = data["stargazers_count"]
         repo_description = data["description"]
+        repo_contributors = data["contributors_url"]
         repo_license = data["license"]
         repo_readme_content = await self.get_readme_content(data["full_name"])
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
+
+        # Get the contributors from the repo_contributors_url
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(repo_contributors)
+            data = response.json()
+            repo_contributors = [contributor["login"] for contributor in data]
+        print(repo_contributors)
 
         summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
@@ -132,6 +140,7 @@ class GithubAPI():
             "url": repo_url,
             "forks": repo_forks,
             "stars": repo_stars,
+            "contributors": repo_contributors,
             "license": repo_license,
             "summary": summary,
         }

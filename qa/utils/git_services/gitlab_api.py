@@ -76,6 +76,7 @@ class GitlabAPI():
         project = self.gl.projects.get(project_id)
         return project.attributes
     
+    
     async def get_lincense(self, repo_url: str) -> dict:
         try:
             if not repo_url.startswith("http"):
@@ -88,7 +89,7 @@ class GitlabAPI():
             soup = BeautifulSoup(html_content, "html.parser")
 
             val = soup.find('span', class_='project-stat-value')
-            print(val.text)
+            # print(val.text)
             if val:
                 return val.text
             return None
@@ -106,6 +107,13 @@ class GitlabAPI():
 
         try:
             project = self.gl.projects.get(project_path)
+    
+
+
+
+            # async with httpx.AsyncClient(timeout=10) as client:
+            #     response = await client.get(project.members)
+            #     print(response.json())
 
             repo_description = project.description
             readme_content = await self.get_readme_content(project.id)
@@ -113,7 +121,6 @@ class GitlabAPI():
                 readme_content = repo_description
 
             summary = await summarize(lang=lang, readme_content=readme_content, description=repo_description, model=self.model)
-            print(project)
             info = {
                 'name': project.name,
                 'version_control': 'gitlab',
@@ -121,6 +128,7 @@ class GitlabAPI():
                 'stars': project.star_count,
                 'forks': project.forks_count,
                 'summary': summary,
+                'contributors' : [project.namespace['name']],   
                 'licence': await self.get_lincense(repo_url),
             }
 
