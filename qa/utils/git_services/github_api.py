@@ -26,7 +26,7 @@ class GithubAPI():
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
 
-        # TODO
+
         summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         results.append(
@@ -44,8 +44,6 @@ class GithubAPI():
 
 
     async def search_repositories(self, query, repos: list, lang: str = "en"):
-
-        print(query)
 
         search_url = "https://api.github.com/search/repositories"
         stars = "100"
