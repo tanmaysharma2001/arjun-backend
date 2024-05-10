@@ -1,6 +1,7 @@
 from qa.utils.git_services.github_api import GithubAPI
 from qa.utils.git_services.gitverse_api import GitverseAPI
 from qa.utils.git_services.gitlab_api import GitlabAPI
+from qa.utils.git_services.launchpad_api import LaunchPadAPI
 from qa.utils.git_services.moshub_api import MoshubAPI
 from qa.utils.git_services.gitflame_api import GitFlameAPI
 from qa.utils.keyword_generator import generate_keywords
@@ -17,6 +18,7 @@ async def smart_search(lang, query, n_results, model):
     gitlab_api = GitlabAPI(model=model)
     moshub_api = MoshubAPI(model=model)
     gitflame_api = GitFlameAPI(model=model)
+    launchpad_api = LaunchPadAPI(model=model)
 
     en_queries = await generate_queries("en", query, model=model)
     en_queries = en_queries[:2]
@@ -35,6 +37,7 @@ async def smart_search(lang, query, n_results, model):
     gitlab_repositories = []
     moshub_repositories = []
     gitflame_repositories = []
+    launchpad_repositories = []
     threads = []
     for i in range(min(len(en_keywords), len(ru_keywords))):
 
@@ -113,6 +116,23 @@ async def smart_search(lang, query, n_results, model):
         threads.append(_t)
         _t.start()
 
+        # LaunchPad
+        _t = threading.Thread(
+            target=asyncio.run,
+            args=(
+                launchpad_api.search_repositories(
+                    query=en_keywords[i],
+                    results=launchpad_repositories,
+                    n_repos=5,
+                    lang=lang,
+                )
+            ),
+            daemon=True
+        )
+
+        threads.append(_t)
+        _t.start()
+
 
     for thread in threads:
         thread.join()
@@ -135,6 +155,10 @@ async def smart_search(lang, query, n_results, model):
         repo.pop("description", None)
 
     for repo in gitflame_repositories:
+        repo.pop("readme_content", None)
+        repo.pop("description", None)
+        
+    for repo in launchpad_repositories:
         repo.pop("readme_content", None)
         repo.pop("description", None)
 
@@ -170,6 +194,16 @@ async def smart_search(lang, query, n_results, model):
         final_result.append(ranked_gitlab_repositories)
     else:
         print(no_match_str + "Gitlab")
+
+    if launchpad_repositories:
+        launchpad_repositories = get_unique_repos(
+            launchpad_repositories)        
+        print(f"Ranking {len(launchpad_repositories) } Launchpad repositories based on their summaries...")
+        ranked_launchpad_repositories = rank_repositories(
+            query, launchpad_repositories, math.floor(n_results * 0.2))
+        final_result.append(ranked_launchpad_repositories)
+    else:
+        print(no_match_str + "LaunchPad")
 
     if moshub_repositories:
         moshub_repositories = get_unique_repos(
