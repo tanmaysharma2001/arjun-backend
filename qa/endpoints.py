@@ -10,6 +10,7 @@ from qa.utils.git_services.gitlab_api import GitlabAPI
 from qa.utils.git_services.gitverse_api import GitverseAPI
 from qa.utils.git_services.moshub_api import MoshubAPI
 from qa.utils.git_services.gitflame_api import GitFlameAPI
+from qa.utils.git_services.gitflic_api import GitflicAPI
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ async def search(query: GetRepoInfoRequest):
     domain = repo_url.split("/")[2]
     
     response = {}
-    
+    print(domain)
     if "github" in domain:
         response = await GithubAPI().get_repo_info(repo_url, lang)
     elif "gitlab" in domain:
@@ -39,6 +40,8 @@ async def search(query: GetRepoInfoRequest):
         response = await MoshubAPI().get_repo_info(repo_url, lang)
     elif "gitflame" in domain:
         response = await GitFlameAPI().get_repo_info(repo_url, lang)
+    elif "gitflic" in domain:
+        response = await GitflicAPI().get_repo_info(repo_url, lang)
     else:
         response = {
             "error": "Repo link is invalid"
