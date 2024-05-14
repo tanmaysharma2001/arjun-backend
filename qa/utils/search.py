@@ -39,6 +39,8 @@ async def smart_search(lang, query, n_results, model):
     gitflame_repositories = []
     launchpad_repositories = []
     threads = []
+
+    # Searching through each Git Providers
     for i in range(min(len(en_keywords), len(ru_keywords))):
 
         # Github
@@ -125,17 +127,16 @@ async def smart_search(lang, query, n_results, model):
                     results=launchpad_repositories,
                     n_repos=5,
                     lang=lang,
-                )
+                ),
             ),
-            daemon=True
         )
 
         threads.append(_t)
         _t.start()
 
-
     for thread in threads:
         thread.join()
+
 
     # readme_content and description are not necessary anymore
     for repo in github_repositories:
@@ -251,3 +252,4 @@ def get_unique_repos(repositories: list):
             print(repo)
             print(e)
     return result
+
