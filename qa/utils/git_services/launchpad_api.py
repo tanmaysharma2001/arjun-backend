@@ -45,6 +45,6 @@ class LaunchPadAPI():
                 "description": None,
                 "readme_content": None,
                 "summary": description
-            })
-        
+            })  
+
         repos.extend(repositories)

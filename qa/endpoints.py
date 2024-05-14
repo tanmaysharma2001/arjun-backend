@@ -3,7 +3,7 @@ from .models import QueryRequest, RepoAddRequest, GetRepoInfoRequest
 from .utils.lang_detector import detect_lang
 from .utils.search import smart_search
 # from .utils.search import process_github_result, process_gitverse_result, get_github_repo_info
-from .utils.database import add_repo_to_db
+# from .utils.database import add_repo_to_db
 import urllib
 from qa.utils.git_services.github_api import GithubAPI
 from qa.utils.git_services.gitlab_api import GitlabAPI
