@@ -17,7 +17,7 @@ async def summarize(lang, readme_content, description, model):
         client = AsyncOpenAI(timeout=10)
 
         response = await client.chat.completions.create(
-            model="gpt-4-1106-vision-preview",
+            model="gpt-4-1106-preview",
             response_format={"type": "json_object"},
             messages=[
                 {
@@ -73,7 +73,7 @@ async def get_final_summary(ranked_repositories, model):
         client = AsyncOpenAI(timeout=10)
 
         response = await client.chat.completions.create(
-            model="gpt-4-1106-vision-preview",
+            model="gpt-4-1106-preview",
             response_format={"type": "json_object"},
             messages=[
                 {

@@ -34,7 +34,7 @@ async def generate_keywords(lang, queries, model):
     
     if model == "openai":
         client = AsyncOpenAI(timeout=10)
-        model_name = "gpt-4-1106-vision-preview"
+        model_name = "gpt-4-1106-preview"
     else:
         client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
         model_name = model
