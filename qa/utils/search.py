@@ -125,9 +125,8 @@ async def smart_search(lang, query, n_results, model):
                     results=launchpad_repositories,
                     n_repos=5,
                     lang=lang,
-                )
+                ),
             ),
-            daemon=True
         )
 
         threads.append(_t)

@@ -5,6 +5,7 @@ from openai import AsyncOpenAI
 from dotenv import load_dotenv, find_dotenv
 from .prompts import KEYWORD_GENERATOR_PROMPT
 import threading
+import asyncio
 
 load_dotenv(find_dotenv())
 
@@ -42,7 +43,10 @@ async def generate_keywords(lang, queries, model):
     keyword_list = []
     threads = []
     for query in queries:
-        t = threading.Thread(target=generate_keyword, args=(client, model_name, lang, query, keyword_list))
+        t = threading.Thread(
+            target=asyncio.run,
+            args=(generate_keyword(client, model_name, lang, query, keyword_list),)
+        )
         t.start()
         threads.append(t)
     for t in threads:
