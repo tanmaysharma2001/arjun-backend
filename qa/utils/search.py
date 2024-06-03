@@ -32,6 +32,9 @@ async def smart_search(lang, query, n_results, model):
     ru_keywords = await generate_keywords("ru", ru_queries, model=model)
     ru_keywords = ru_keywords[:4]
 
+    if en_queries and ru_queries and en_keywords and ru_keywords:
+        print("Successfully generated queries & keywords")
+
     github_repositories = []
     gitverse_repositories = []
     gitlab_repositories = []
@@ -210,7 +213,6 @@ async def smart_search(lang, query, n_results, model):
         moshub_repositories = get_unique_repos(
             moshub_repositories)
         print(f"Ranking {len(moshub_repositories)} Moshub repositories based on their summaries...")
-        print(f"Ranking {len(moshub_repositories) } Moshub repositories based on their summaries...")
         ranked_moshub_repositories = rank_repositories(
             query, moshub_repositories, math.floor(n_results * 0.1))
         final_result.append(ranked_moshub_repositories)
@@ -240,9 +242,6 @@ def get_unique_repos(repositories: list):
     done = set()
     result = []
     for repo in repositories:
-        if "url" not in repo.keys():
-            print("HERE")
-            print(repo) 
         try:
             if repo["url"] not in done:
                 done.add(repo["url"])

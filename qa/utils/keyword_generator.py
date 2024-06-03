@@ -32,7 +32,8 @@ async def generate_keyword(client, model_name, lang, query, keyword_list):
 
 
 async def generate_keywords(lang, queries, model):
-    
+    print(f"Generating keywords for ({lang})")
+
     if model == "openai":
         client = AsyncOpenAI(timeout=10)
         model_name = "gpt-4-1106-preview"
@@ -52,5 +53,5 @@ async def generate_keywords(lang, queries, model):
     for t in threads:
         t.join()
         
-    print(f"Keywords: {keyword_list}")
+    print(f"Keywords ({lang}): {keyword_list}")
     return keyword_list

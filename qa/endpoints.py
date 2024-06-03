@@ -17,7 +17,7 @@ router = APIRouter()
 @router.post("/query")
 async def search(query: QueryRequest):
     lang = await detect_lang(query=query.text, model='openai')
-    repos = await smart_search(lang, query.text, int(query.n_results), model='openai')
+    repos = await smart_search(lang["detected_language"], query.text, int(query.n_results), model='openai')
     return repos
 
 

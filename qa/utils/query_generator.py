@@ -29,7 +29,7 @@ async def generate_queries(lang, query, model):
         )
 
         queries = json.loads(response.choices[0].message.content)
-        print(f"Queries: {queries}")
+        print(f"Queries ({lang}): {queries}")
         return queries["queries"]
     else:
 

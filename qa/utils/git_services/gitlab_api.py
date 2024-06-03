@@ -6,11 +6,14 @@ from dotenv import load_dotenv, find_dotenv
 import httpx
 from bs4 import BeautifulSoup
 import os
+
+
 class GitlabAPI():
 
     def __init__(self, model: str = "openai") -> None:
         load_dotenv(find_dotenv())
-        self.gl = gitlab.Gitlab('https://gitlab.com', private_token=os.environ["GITLAB_ACCESS_TOKEN"])
+        self.gl = gitlab.Gitlab(
+            'https://gitlab.com', private_token=os.environ["GITLAB_ACCESS_TOKEN"])
         self.model = model
 
     async def process_result(self, project, results: list, lang: str = "en") -> None:
@@ -19,7 +22,10 @@ class GitlabAPI():
         project_forks = project["forks_count"]
         project_stars = project["star_count"]
         project_description = project["description"]
-        project_licence = project['license']
+
+        # Removed. It's not in the "project" dictionary
+        # project_licence = project['license']
+
         project_readme_content = await self.get_readme_content(project["id"])
         if project_readme_content == "README not found or access denied.":
             project_readme_content = project_description
@@ -34,7 +40,7 @@ class GitlabAPI():
             "forks": project_forks,
             "stars": project_stars,
             "description": project_description,
-            "license": project_licence,
+            # "license": project_licence,
             "readme_content": project_readme_content,
             "summary": summary,
         })
@@ -75,8 +81,7 @@ class GitlabAPI():
         project_id = project_url.split('/')[-1]
         project = self.gl.projects.get(project_id)
         return project.attributes
-    
-    
+
     async def get_lincense(self, repo_url: str) -> dict:
         try:
             if not repo_url.startswith("http"):
@@ -93,13 +98,9 @@ class GitlabAPI():
             if val:
                 return val.text
             return None
-            
-
-           
 
         except Exception as e:
             raise e
-
 
     async def get_repo_info(self, repo_url: str, lang="en"):
         project_path = repo_url.split(
@@ -107,9 +108,6 @@ class GitlabAPI():
 
         try:
             project = self.gl.projects.get(project_path)
-    
-
-
 
             # async with httpx.AsyncClient(timeout=10) as client:
             #     response = await client.get(project.members)
@@ -128,7 +126,7 @@ class GitlabAPI():
                 'stars': project.star_count,
                 'forks': project.forks_count,
                 'summary': summary,
-                'contributors' : [project.namespace['name']],   
+                'contributors': [project.namespace['name']],
                 'licence': await self.get_lincense(repo_url),
             }
 
