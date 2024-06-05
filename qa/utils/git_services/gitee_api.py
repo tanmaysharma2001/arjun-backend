@@ -1,20 +1,42 @@
+import os
+import sys
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+import asyncio
 
 
 class GiteeAPI:
-    def __init__(self, model: str, driver):
+    def __init__(self, model="openai"):
         self.model = model
-        self.driver = driver
+        self.driver = self.setup_driver()
 
-    def fetch_repo_details(self, repo_url):
+    def setup_driver(self):
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--disable-infobars")
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+
+        driver = webdriver.Chrome(options=chrome_options)
+        return driver
+
+    async def fetch_repo_details(self, repo_url):
         self.driver.get(repo_url)
+        await asyncio.sleep(10)
         readme_content = "No README found."
         languages = []
+        stars = 0
+        forks = 0
 
         if self.model == "openai":
             try:
@@ -22,7 +44,7 @@ class GiteeAPI:
                     EC.presence_of_element_located((By.ID, "git-readme"))
                 )
                 page_source = self.driver.page_source
-                soup = BeautifulSoup(page_source, "html.parser")
+                soup = BeautifulSoup(page_source, features="html.parser")
                 readme_box = soup.find("div", id="git-readme")
                 if readme_box:
                     readme_content = readme_box.get_text(strip=True)
@@ -31,7 +53,7 @@ class GiteeAPI:
 
         try:
             page_source = self.driver.page_source
-            soup = BeautifulSoup(page_source, "html.parser")
+            soup = BeautifulSoup(page_source, features="html.parser")
             language_rows = soup.find_all("div", class_="row")
             for row in language_rows:
                 lang_elem = row.find("div", class_="lang")
@@ -49,19 +71,32 @@ class GiteeAPI:
         except Exception as e:
             print("Error fetching languages:", e)
 
-        return readme_content, languages
+        try:
+            stars_elem = soup.find("span", class_="repo-stars")
+            forks_elem = soup.find("span", class_="repo-forks")
+            if stars_elem:
+                stars = int(stars_elem.get_text(strip=True).replace(",", ""))
+            if forks_elem:
+                forks = int(forks_elem.get_text(strip=True).replace(",", ""))
+        except Exception as e:
+            print("Error fetching stars and forks:", e)
 
-    def search_repositories(self, query, repos: list, page: int = 1):
+        return readme_content, languages, stars, forks
+
+    async def search_repositories(
+        self, query, repos: list, lang: str = "en", n_repos: int = 2
+    ):
+        page = 1
         url = f"https://so.gitee.com/?q={query}&page={page}"
         self.driver.get(url)
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, "card-body"))
-        )
+        await asyncio.sleep(10)
         page_source = self.driver.page_source
-        soup = BeautifulSoup(page_source, "html.parser")
+        soup = BeautifulSoup(page_source, features="html.parser")
 
         cards = soup.find_all("div", class_="card border-1 mb-3")
-        for card in cards:
+        for i, card in enumerate(cards):
+            if i >= n_repos:
+                break
             title_link = card.find("h4", class_="card-title").find(
                 "a", class_="title"
             )
@@ -71,20 +106,8 @@ class GiteeAPI:
                 "div", class_="col-12 outline text-secondary"
             ).text.strip()
 
-            readme_content, languages = self.fetch_repo_details(link)
-
-            metadata = card.find(
-                "div", class_="col-12 text-muted mt-2 metadata"
-            )
-            stars = (
-                metadata.find_all("span")[1].text
-                if len(metadata.find_all("span")) > 1
-                else "0"
-            )
-            forks = (
-                metadata.find_all("span")[2].text
-                if len(metadata.find_all("span")) > 2
-                else "0"
+            readme_content, languages, stars, forks = (
+                await self.fetch_repo_details(link)
             )
 
             repos.append(
@@ -92,8 +115,8 @@ class GiteeAPI:
                     "name": name,
                     "version_control": "gitee",
                     "url": link,
-                    "forks": int(forks),
-                    "stars": int(stars),
+                    "forks": forks,
+                    "stars": stars,
                     "description": description,
                     "readme_content": readme_content,
                     "languages": languages,
@@ -101,32 +124,45 @@ class GiteeAPI:
                 }
             )
 
+    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
+        repo_name = repo_url.split("/")[4]
+        repo_owner = repo_url.split("/")[3]
+        readme_content, languages, stars, forks = (
+            await self.fetch_repo_details(repo_url)
+        )
 
-def setup_driver():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--disable-infobars")
-    chrome_options.add_argument("--remote-debugging-port=9222")
-    chrome_options.add_argument("--disable-setuid-sandbox")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+        summary = ""
 
-    driver = webdriver.Chrome(options=chrome_options)
-    return driver
+        info = {
+            "name": repo_name,
+            "version_control": "gitee",
+            "url": repo_url,
+            "contributors": [repo_owner],
+            "forks": forks,
+            "stars": stars,
+            "summary": summary,
+            "languages": languages,
+            "licence": "",
+        }
+
+        return info
+
+    def close(self):
+        self.driver.quit()
 
 
 # async def main():
-#     driver = setup_driver()
-#     api = GiteeAPI("openai", driver)  # Use "openai" to fetch README content
+#     api = GiteeAPI()  # Use "openai" to fetch README content
+
+#     repo_info = await api.get_repo_info("https://gitee.com/fasiondog/hikyuu", "en")
+#     print("Specific Repository Info:", repo_info)
+
 #     repositories = []
-#     api.search_repositories("c++", repositories)
+#     await api.search_repositories("c++", repositories, n_repos=2)
 #     for repo in repositories:
-#         print(repo)
-#     driver.quit()
+#         print("Repository Info:", repo)
+
+#     api.close()
 
 # if __name__ == "__main__":
 #     asyncio.run(main())
