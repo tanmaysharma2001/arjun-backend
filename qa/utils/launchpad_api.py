@@ -7,7 +7,7 @@ class LaunchPadAPI():
         self.model = model
     
 
-    async def search_repositories(self, query, results: list, n_repos: int, lang: str = "en"):
+    async def search_repositories(self, query, repos: list, lang: str = "en"):
         url = f"https://launchpad.net/projects?text=${query}&search=Find+a+Project"
         response = requests.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -45,7 +45,6 @@ class LaunchPadAPI():
                 "description": None,
                 "readme_content": None,
                 "summary": description
-            })  
-
-        results.extend(repositories)
-
+            })
+        
+        repos.extend(repositories)

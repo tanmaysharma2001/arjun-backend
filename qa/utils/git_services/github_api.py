@@ -66,7 +66,7 @@ class GithubAPI():
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.get(search_url, headers=self.headers, params=params)
-                data = response.json()[:10]
+                data = response.json()
 
             repositories = []
             threads = []

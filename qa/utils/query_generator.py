@@ -14,7 +14,7 @@ async def generate_queries(lang, query, model):
         client = AsyncOpenAI(timeout=10)
 
         response = await client.chat.completions.create(
-            model="gpt-4-turbo-preview",
+            model="gpt-4-1106-preview",
             response_format={"type": "json_object"},
             messages=[
                 {
@@ -29,7 +29,7 @@ async def generate_queries(lang, query, model):
         )
 
         queries = json.loads(response.choices[0].message.content)
-        print(f"Queries: {queries}")
+        print(f"Queries ({lang}): {queries}")
         return queries["queries"]
     else:
 
