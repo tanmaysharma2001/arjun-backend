@@ -1,11 +1,9 @@
 from bs4 import BeautifulSoup
 import httpx
-import xmltodict
-import asyncio
-import threading
 from qa.utils.summarize import summarize
 from dotenv import load_dotenv, find_dotenv
 import os
+import requests
 
 
 class GitflicAPI():
@@ -17,40 +15,20 @@ class GitflicAPI():
 
 
     async def search_repositories(self, query: str, repos: list, lang: str = "en"):
-        url = "https://yandex.ru/search/xml"
-        params = {
-            "folderid": self.yc_folder,
-            "apikey": self.yc_secret_key,
-        }
+        url = f"https://gitflic.ru/search?q={query}"
         results = []
         async with httpx.AsyncClient(timeout=10) as client:
-            params["query"] = query + " host:gitverse.ru"
-            response = await client.get(url, params=params)
-            data_dict = xmltodict.parse(response.text)
-            try:
-                _res = data_dict["yandexsearch"]["response"]["results"]["grouping"][
-                    "group"
-                ]["doc"]
-            except KeyError:
-                print(data_dict)
-                _res = []
-            except TypeError:
-                _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
-
-            threads = []
-
-            for result in _res:
-                if "doc" in result.keys():
-                    result = result["doc"]
-                _t = threading.Thread(
-                    target=asyncio.run,
-                    args=(self.process_result(result, results, lang),),
-                    daemon=True,
-                )
-                threads.append(_t)
-                _t.start()
-            for thread in threads:
-                thread.join()
+            response = await client.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        try:
+            elements = soup.find_all(class_='py-4', recursive=True)
+            for element in elements:
+                link = element.find('a')
+                url = "https://gitflic.ru" + link['href']
+                info = await self.get_repo_info(url, lang)
+                results.append(info)
+        except Exception as e:
+            print(e)
 
         repos.extend(results)
 

@@ -1,3 +1,4 @@
+from qa.utils.git_services.gitflic_api import GitflicAPI
 from qa.utils.git_services.github_api import GithubAPI
 from qa.utils.git_services.gitverse_api import GitverseAPI
 from qa.utils.git_services.gitlab_api import GitlabAPI
@@ -22,6 +23,7 @@ async def smart_search(lang, query, n_results, model):
     gitflame_api = GitFlameAPI(model=model)
     launchpad_api = LaunchPadAPI(model=model)
     gitee_api = GiteeAPI(model=model)
+    gitflic_api = GitflicAPI(model = model)
 
     en_queries = await generate_queries("en", query, model=model)
     en_queries = en_queries[:2]
@@ -44,6 +46,7 @@ async def smart_search(lang, query, n_results, model):
     gitflame_repositories = []
     launchpad_repositories = []
     gitee_repositories = []
+    gitflic_repositories = []
     threads = []
 
     # Searching through each Git Providers
@@ -153,6 +156,21 @@ async def smart_search(lang, query, n_results, model):
                     repos=gitlab_repositories,
                     lang=lang,
                     n_repos=1,
+                ),
+            ),
+        )
+
+        threads.append(_t)
+        _t.start()
+
+        # Gitflic
+        _t = threading.Thread(
+            target=asyncio.run,
+            args=(
+                gitflic_api.search_repositories(
+                    query=en_keywords[i],
+                    repos=gitflic_repositories,
+                    lang=lang,
                 ),
             ),
         )
@@ -276,6 +294,19 @@ async def smart_search(lang, query, n_results, model):
         final_result.append(ranked_gitee_repositories)
     else:
         print(no_match_str + "Gitee")
+
+    
+    if gitflic_repositories:
+        gitflic_repositories = get_unique_repos(gitflic_repositories)
+        print(
+            f"Ranking {len(gitflic_repositories)} GitFlic repositories based on their summaries..."
+        )
+        ranked_gitflic_repositories = rank_repositories(
+            query, gitflic_repositories, math.floor(n_results * 0.1)
+        )
+        final_result.append(ranked_gitflic_repositories)
+    else:
+        print(no_match_str + "Gitflic")
 
     if final_result:
         final_result = final_result[:10]
