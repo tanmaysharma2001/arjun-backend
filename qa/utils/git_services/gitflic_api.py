@@ -87,6 +87,9 @@ class GitflicAPI():
             else:
                 info["description"] = ""
 
+            techs =  [forks_element[3].text.strip().split('\n')[0]]
+            info["technologies"] = [{"name" : k, "percent" : (1 / len(techs)) * 100} for k in techs]
+
         except Exception as e:
             raise e
 
@@ -139,6 +142,7 @@ class GitflicAPI():
                         "readme_content": readme_content,
                         'contributors': contributors,
                         "summary": summary,
+                        "technologies": repo_info["technologies"],
                     }
                 )
             except Exception as e:
@@ -167,5 +171,6 @@ class GitflicAPI():
             "licence": repo_license,
             "summary": summary,
             "contributors" : repo_contributors,
+            "technologies" : data["technologies"],
         }
         return info
