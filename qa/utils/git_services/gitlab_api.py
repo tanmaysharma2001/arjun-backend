@@ -6,6 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 import httpx
 from bs4 import BeautifulSoup
 import os
+import requests
 
 
 class GitlabAPI():
@@ -16,6 +17,57 @@ class GitlabAPI():
             'https://gitlab.com', private_token=os.environ["GITLAB_ACCESS_TOKEN"])
         self.model = model
 
+    def get_repo_languages(self, project_id) -> dict:
+        url = f"https://gitlab.com/api/v4/projects/{project_id}/languages"
+
+        # Set up the headers with the access token
+        headers = {
+            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+        }
+
+        # Make the GET request to the URL
+        response = requests.get(url, headers=headers)
+
+        languages_list = response.json()
+
+        return languages_list
+
+
+    def get_licence(self, id):
+        url = f"https://gitlab.com/api/v4/projects/{id}?license=true"
+
+        # Set up the headers with the access token
+        headers = {
+            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+        }
+
+        # Make the GET request to the URL
+        response = requests.get(url, headers=headers)
+
+        project = response.json()
+
+        return project['license']
+
+    def get_repo_contributors(self, id):
+        url = f"https://gitlab.com/api/v4/projects/{id}/repository/contributors"
+
+        # Set up the headers with the access token
+        headers = {
+            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+        }
+
+        # Make the GET request to the URL
+        response = requests.get(url, headers=headers)
+
+        contributors_response = response.json()
+
+        contributors = []
+
+        for contributor in contributors_response:
+            contributors.append(contributor['email'])
+
+        return contributors
+
     async def process_result(self, project, results: list, lang: str = "en") -> None:
         project_name = project["name"]
         project_url = project["web_url"]
@@ -23,8 +75,17 @@ class GitlabAPI():
         project_stars = project["star_count"]
         project_description = project["description"]
 
-        # Removed. It's not in the "project" dictionary
-        # project_licence = project['license']
+        # Project Languages
+        languages = self.get_repo_languages(project["id"])
+
+        # Get Licence
+        project_license = self.get_licence(project["id"])
+
+        if project_license:
+            project_license = project_license['name']
+
+        # Get contributors
+        project_contributors = self.get_repo_contributors(project['id'])
 
         project_readme_content = await self.get_readme_content(project["id"])
         if project_readme_content == "README not found or access denied.":
@@ -40,9 +101,11 @@ class GitlabAPI():
             "forks": project_forks,
             "stars": project_stars,
             "description": project_description,
-            # "license": project_licence,
+            "license": project_license,
             "readme_content": project_readme_content,
             "summary": summary,
+            "languages": languages,
+            "contributors": project_contributors
         })
 
     async def search_repositories(self, query, repos: list, lang: str = "en"):
@@ -102,6 +165,9 @@ class GitlabAPI():
         except Exception as e:
             raise e
 
+    # async def get_repo_languages(self):
+    #
+
     async def get_repo_info(self, repo_url: str, lang="en"):
         project_path = repo_url.split(
             'gitlab.com/')[1] if 'gitlab.com/' in repo_url else repo_url
@@ -118,7 +184,16 @@ class GitlabAPI():
             if readme_content == "README not found or access denied.":
                 readme_content = repo_description
 
-            summary = await summarize(lang=lang, readme_content=readme_content, description=repo_description, model=self.model)
+            summary = await summarize(
+                lang=lang,
+                readme_content=readme_content,
+                description=repo_description,
+                model=self.model
+            )
+
+            # Get Language Info
+            # language_list = get_repo_languages()
+
             info = {
                 'name': project.name,
                 'version_control': 'gitlab',
