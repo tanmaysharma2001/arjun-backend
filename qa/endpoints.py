@@ -1,3 +1,5 @@
+import time
+
 from fastapi import APIRouter
 from .models import QueryRequest, RepoAddRequest, GetRepoInfoRequest
 from .utils.lang_detector import detect_lang
@@ -19,6 +21,7 @@ router = APIRouter()
 
 @router.post("/query")
 async def search(query: QueryRequest):
+    start_time = time.time()
     lang = await detect_lang(query=query.text, model="openai")
     repos = await smart_search(
         lang["detected_language"],
@@ -26,6 +29,9 @@ async def search(query: QueryRequest):
         int(query.n_results),
         model="openai",
     )
+    end_time = time.time()
+    total_time = end_time - start_time
+    print("Time taken to get results in seconds: " + str(total_time))
     return repos
 
 
