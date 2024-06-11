@@ -32,7 +32,6 @@ class GitlabAPI():
 
         return languages_list
 
-
     def get_licence(self, id):
         url = f"https://gitlab.com/api/v4/projects/{id}?license=true"
 
@@ -92,7 +91,7 @@ class GitlabAPI():
             project_readme_content = project_description
 
         # TODO
-        summary = await summarize(lang, project_readme_content, project_description,  model=self.model)
+        summary = await summarize(lang, project_readme_content, project_description, model=self.model)
 
         results.append({
             "name": project_name,
@@ -191,8 +190,12 @@ class GitlabAPI():
                 model=self.model
             )
 
+            # Project ID
+            project_id = project.id
+            print(project_id)
+
             # Get Language Info
-            # language_list = get_repo_languages()
+            language_list = self.get_repo_languages(project.id)
 
             info = {
                 'name': project.name,
@@ -203,6 +206,7 @@ class GitlabAPI():
                 'summary': summary,
                 'contributors': [project.namespace['name']],
                 'licence': await self.get_lincense(repo_url),
+                "languages": language_list,
             }
 
             return info
@@ -210,3 +214,16 @@ class GitlabAPI():
         except Exception as e:
             print("Error while fetching gitlab repo info: ", e)
             return str(e)
+
+
+# api = GitlabAPI(model="openai")
+#
+# queries = ["python"]
+#
+#
+# async def main():
+#     repos = await api.get_repo_info("https://gitlab.com/gb_python/python", "en")
+#     print(repos)
+#
+#
+# asyncio.run(main())

@@ -15,6 +15,7 @@ from qa.utils.git_services.gitee_api import GiteeAPI
 from qa.utils.git_services.moshub_api import MoshubAPI
 from qa.utils.git_services.gitflame_api import GitFlameAPI
 from qa.utils.git_services.gitflic_api import GitflicAPI
+from qa.utils.git_services.launchpad_api import LaunchPadAPI
 
 router = APIRouter()
 
@@ -48,6 +49,8 @@ async def search(query: GetRepoInfoRequest):
         response = await GithubAPI().get_repo_info(repo_url, lang)
     elif "gitlab" in domain:
         response = await GitlabAPI().get_repo_info(repo_url, lang)
+    elif "launchpad" in domain:
+        response = await LaunchPadAPI(model="openai").get_repo_info(repo_url, lang)
     elif "gitverse" in domain:
         response = await GitverseAPI().get_repo_info(repo_url, lang)
     elif "gitee" in domain:
