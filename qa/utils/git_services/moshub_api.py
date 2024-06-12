@@ -124,8 +124,8 @@ class MoshubAPI():
         repo_name = info["repo_name"]
         repo_url = info["repo_url"]
         repo_owner = info["repo_owner"]
-        repo_forks = info.get("forks", 0)
-        repo_stars = info.get('stars', 0)
+        repo_forks = 0
+        repo_stars = info["star_count"]
         repo_description = ""
         repo_readme_content = info.get(
             "readme_content", "There is no README for this repo")
@@ -141,7 +141,7 @@ class MoshubAPI():
                 "owner": repo_owner,
                 "version_control": "moshub",
                 "url": repo_url,
-                "forks": repo_forks,
+                #"forks": repo_forks,
                 "stars": repo_stars,
                 # "description": repo_description,
                 "readme_content": repo_readme_content,
