@@ -46,7 +46,7 @@ async def smart_search(lang, query, n_results, model):
     gitflame_repositories = []
     launchpad_repositories = []
     gitee_repositories = []
-    gitflic_repositories = []
+
     threads = []
 
     # Searching through each Git Providers
