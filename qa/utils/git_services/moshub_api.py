@@ -67,9 +67,22 @@ class MoshubAPI():
             if repo_readme_content != "":
                 info["readme_content"] = repo_readme_content
                 break
+        if not info.get("readme_content"):
+            info["readme_content"] = ""
 
         info["star_count"] = int(soup.find_all(
             'a', {'class': 'gl-button btn btn-default has-tooltip star-count count'})[0].text)
+
+        tools = soup.find_all('div', class_= 'progress-bar')
+        technologies = []
+        for tool in tools:
+            #name =  tool.tile('span', class_ = 'repository-language-bar-tooltip-language')
+            #percent = tool.find('span', class_ = 'repository-language-bar-tooltip-share')
+            splitted = tool['title'].split('>')
+            tool = splitted[1].split('<')[0]
+            percentage = splitted[3].split('<')[0]
+            technologies.append({"name": tool, "percent": percentage})
+        info["technologies"] = technologies
 
         return info
 
@@ -86,7 +99,7 @@ class MoshubAPI():
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
             return readme.content.decode()
-        print(f"Can not find readme.md for gitverse for this link: {readme_url}")
+        print(f"Can not find readme.md for moshub for this link: {readme_url}")
         return ""
 
     def get_readme_urls(self, owner_name: str, repo_name: str, ) -> typing.List[str]:
@@ -111,11 +124,14 @@ class MoshubAPI():
         repo_name = info["repo_name"]
         repo_url = info["repo_url"]
         repo_owner = info["repo_owner"]
-        repo_forks = 0
-        repo_stars = info["star_count"]
+        repo_forks = info.get("forks", 0)
+        repo_stars = info.get('stars', 0)
         repo_description = ""
         repo_readme_content = info.get(
             "readme_content", "There is no README for this repo")
+        technologies = info.get("technologies", [])
+        contributors = info.get("contributors", [])
+        license = info.get("license", None)
 
         summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
@@ -125,11 +141,14 @@ class MoshubAPI():
                 "owner": repo_owner,
                 "version_control": "moshub",
                 "url": repo_url,
-                # "forks": repo_forks,
+                "forks": repo_forks,
                 "stars": repo_stars,
                 # "description": repo_description,
                 "readme_content": repo_readme_content,
                 "summary": summary,
+                "technologies": technologies,
+                "contributors": contributors,
+                "licence": license
             }
         )
 
@@ -141,7 +160,7 @@ class MoshubAPI():
         repo_forks = 0
         repo_stars = scraped_info["star_count"]
         readme_content = scraped_info["readme_content"]
-        summary = await summarize(lang=lang, readme_content=readme_content, description="")
+        summary = await summarize(lang=lang, readme_content=readme_content, description="", model=self.model)
         info = {
             "name": repo_name,
             "version_control": "moshub",
@@ -151,6 +170,7 @@ class MoshubAPI():
             "summary": summary,
             "contributors": contributors,
             "licence": scraped_info["license"],
+            "technologies": scraped_info["technologies"],
         }
 
         return info
