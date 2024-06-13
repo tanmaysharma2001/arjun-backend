@@ -10,7 +10,7 @@ class LaunchPadAPI():
     def __init__(self, model: str) -> None:
         self.model = model
 
-    async def get_repo_info(self, url, lang: str = 'en'):
+    def get_repo_info(self, url, lang: str = 'en'):
 
         summary = ""
         description = ""
@@ -20,21 +20,24 @@ class LaunchPadAPI():
         repo_soup = BeautifulSoup(repo_response.content, "html.parser")
 
         # get name and description
-        name = repo_soup.find('h2', id="watermark-heading").get_text(strip=True)
+        name = repo_soup.find('h2', id="watermark-heading")
+
+        if name:
+            name = name.get_text(strip=True)
 
         # description is inside id = maincontent, inside class "yui-b"
         # inside "top-portlet", inside "description"
         div_maincontent = repo_soup.find('div', id="maincontent")
         div_yui_b = div_maincontent.find('div', {"class": "yui-b"})
         div_top_portlet = div_yui_b.find('div', {"class": "top-portlet"})
-        div_summary_content = div_yui_b.find('div', {"class": "summary"}).get_text(strip=True)
-        div_description_content = div_yui_b.find('div', {"class": "description"}).get_text(strip=True)
+        div_summary_content = div_yui_b.find('div', {"class": "summary"})
+        div_description_content = div_yui_b.find('div', {"class": "description"})
 
         if div_summary_content:
-            summary = div_summary_content
+            summary = div_summary_content.get_text(strip=True)
 
         if div_description_content:
-            description = div_description_content
+            description = div_description_content.get_text(strip=True)
 
         licence_repo = ""
         languages_list = []
@@ -145,17 +148,3 @@ class LaunchPadAPI():
         except Exception as e:
             print("from search_repo_launchpad")
             print(e)
-
-
-# api = LaunchPadAPI(model="openai")
-#
-# queries = ["python"]
-#
-#
-# async def main():
-#     repos = await api.get_repo_info("https://launchpad.net/python", "en")
-#     print(repos)
-#
-#
-# if __name__ == "__main__":
-#     asyncio.run(main())
