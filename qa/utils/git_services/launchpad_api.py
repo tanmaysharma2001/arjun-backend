@@ -1,4 +1,3 @@
-import asyncio
 import threading
 
 from bs4 import BeautifulSoup
@@ -96,7 +95,7 @@ class LaunchPadAPI():
 
         return repo
 
-    async def get_repo(self, repo_data, repositories):
+    def get_repo(self, repo_data, repositories):
         try:
             # Find the link in the first <a> tag within the row
             link = repo_data.find("a")["href"]
@@ -115,7 +114,7 @@ class LaunchPadAPI():
             logger.debug("from get_repo_info_launchpad")
             logger.debug(e)
 
-    async def search_repositories(self, query, results: list, n_repos: int, lang: str = "en"):
+    def search_repositories(self, query, results: list, n_repos: int, lang: str = "en"):
         try:
             url = f"https://launchpad.net/projects?text=${query}&search=Find+a+Project"
             response = requests.get(url)
@@ -135,8 +134,8 @@ class LaunchPadAPI():
                     break
 
                 _t = threading.Thread(
-                    target=asyncio.run,
-                    args=(self.get_repo(row, repositories),),
+                    target=self.get_repo,
+                    args=(row, repositories,),
                     daemon=True
                 )
                 threads.append(_t)

@@ -1,12 +1,11 @@
-import os
-import sys
+import time
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-import asyncio
 
 from utils.logger import logger
 
@@ -32,9 +31,9 @@ class GiteeAPI:
         driver = webdriver.Chrome(options=chrome_options)
         return driver
 
-    async def fetch_repo_details(self, repo_url):
+    def fetch_repo_details(self, repo_url):
         self.driver.get(repo_url)
-        await asyncio.sleep(10)
+        time.sleep(10)
         readme_content = "No README found."
         languages = []
         stars = 0
@@ -86,13 +85,13 @@ class GiteeAPI:
 
         return readme_content, languages, stars, forks
 
-    async def search_repositories(
+    def search_repositories(
         self, query, repos: list, lang: str = "en", n_repos: int = 2
     ):
         page = 1
         url = f"https://so.gitee.com/?q={query}&page={page}"
         self.driver.get(url)
-        await asyncio.sleep(10)
+        time.sleep(10)
         page_source = self.driver.page_source
         soup = BeautifulSoup(page_source, features="html.parser")
 
@@ -110,7 +109,7 @@ class GiteeAPI:
             ).text.strip()
 
             readme_content, languages, stars, forks = (
-                await self.fetch_repo_details(link)
+                self.fetch_repo_details(link)
             )
 
             repos.append(
@@ -127,11 +126,11 @@ class GiteeAPI:
                 }
             )
 
-    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
+    def get_repo_info(self, repo_url: str, lang: str) -> dict:
         repo_name = repo_url.split("/")[4]
         repo_owner = repo_url.split("/")[3]
         readme_content, languages, stars, forks = (
-            await self.fetch_repo_details(repo_url)
+            self.fetch_repo_details(repo_url)
         )
 
         summary = ""

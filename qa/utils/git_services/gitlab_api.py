@@ -1,9 +1,7 @@
 import gitlab
-import asyncio
 import threading
 from qa.utils.summarize import summarize
 from dotenv import load_dotenv, find_dotenv
-import httpx
 from bs4 import BeautifulSoup
 import os
 import requests
@@ -20,96 +18,108 @@ class GitlabAPI():
         self.model = model
 
     def get_repo_languages(self, project_id) -> dict:
-        url = f"https://gitlab.com/api/v4/projects/{project_id}/languages"
+        try:
+            url = f"https://gitlab.com/api/v4/projects/{project_id}/languages"
 
-        # Set up the headers with the access token
-        headers = {
-            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
-        }
+            # Set up the headers with the access token
+            headers = {
+                "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+            }
 
-        # Make the GET request to the URL
-        response = requests.get(url, headers=headers)
+            # Make the GET request to the URL
+            response = requests.get(url, headers=headers)
 
-        languages_list = response.json()
+            languages_list = response.json()
 
-        return languages_list
+            return languages_list
+        except Exception as e:
+            logger.debug(e)
 
     def get_licence(self, id):
-        url = f"https://gitlab.com/api/v4/projects/{id}?license=true"
+        try:
+            url = f"https://gitlab.com/api/v4/projects/{id}?license=true"
 
-        # Set up the headers with the access token
-        headers = {
-            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
-        }
+            # Set up the headers with the access token
+            headers = {
+                "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+            }
 
-        # Make the GET request to the URL
-        response = requests.get(url, headers=headers)
+            # Make the GET request to the URL
+            response = requests.get(url, headers=headers)
 
-        project = response.json()
+            project = response.json()
 
-        return project['license']
+            return project['license']
+        except Exception as e:
+            logger.debug(e)
 
     def get_repo_contributors(self, id):
-        url = f"https://gitlab.com/api/v4/projects/{id}/repository/contributors"
+        try:
+            url = f"https://gitlab.com/api/v4/projects/{id}/repository/contributors"
 
-        # Set up the headers with the access token
-        headers = {
-            "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
-        }
+            # Set up the headers with the access token
+            headers = {
+                "PRIVATE-TOKEN": os.environ["GITLAB_ACCESS_TOKEN"]
+            }
 
-        # Make the GET request to the URL
-        response = requests.get(url, headers=headers)
+            # Make the GET request to the URL
+            response = requests.get(url, headers=headers)
 
-        contributors_response = response.json()
+            contributors_response = response.json()
 
-        contributors = []
+            contributors = []
 
-        for contributor in contributors_response:
-            contributors.append(contributor['email'])
+            for contributor in contributors_response:
+                contributors.append(contributor['email'])
 
-        return contributors
+            return contributors
+        except Exception as e:
+            logger.debug(e)
 
-    async def process_result(self, project, results: list, lang: str = "en") -> None:
-        project_name = project["name"]
-        project_url = project["web_url"]
-        project_forks = project["forks_count"]
-        project_stars = project["star_count"]
-        project_description = project["description"]
+    def process_result(self, project, results: list, lang: str = "en") -> None:
+        try:
+            project_name = project["name"]
+            project_url = project["web_url"]
+            project_forks = project["forks_count"]
+            project_stars = project["star_count"]
+            project_description = project["description"]
 
-        # Project Languages
-        languages = self.get_repo_languages(project["id"])
+            # Project Languages
+            languages = self.get_repo_languages(project["id"])
 
-        # Get Licence
-        project_license = self.get_licence(project["id"])
+            # Get Licence
+            project_license = self.get_licence(project["id"])
 
-        if project_license:
-            project_license = project_license['name']
+            if project_license:
+                project_license = project_license['name']
 
-        # Get contributors
-        project_contributors = self.get_repo_contributors(project['id'])
+            # Get contributors
+            project_contributors = self.get_repo_contributors(project['id'])
 
-        project_readme_content = await self.get_readme_content(project["id"])
-        if project_readme_content == "README not found or access denied.":
-            project_readme_content = project_description
+            project_readme_content = self.get_readme_content(project["id"])
+            if project_readme_content == "README not found or access denied.":
+                project_readme_content = project_description
 
-        # TODO
-        summary = await summarize(lang, project_readme_content, project_description, model=self.model)
+            # TODO
+            summary = summarize(lang, project_readme_content, project_description, model=self.model)
 
-        results.append({
-            "name": project_name,
-            "version_control": "gitlab",
-            "url": project_url,
-            "forks": project_forks,
-            "stars": project_stars,
-            "description": project_description,
-            "license": project_license,
-            "readme_content": project_readme_content,
-            "summary": summary,
-            "languages": languages,
-            "contributors": project_contributors
-        })
+            results.append({
+                "name": project_name,
+                "version_control": "gitlab",
+                "url": project_url,
+                "forks": project_forks,
+                "stars": project_stars,
+                "description": project_description,
+                "license": project_license,
+                "readme_content": project_readme_content,
+                "summary": summary,
+                "languages": languages,
+                "contributors": project_contributors
+            })
+        except Exception as e:
+            logger.debug(e)
 
-    async def search_repositories(self, query, repos: list, lang: str = "en"):
+    def search_repositories(self, query, repos: list, lang: str = "en"):
         try:
             per_page = 5
             page = 1
@@ -123,8 +133,8 @@ class GitlabAPI():
             projects = []
             for project in search_results:
                 _t = threading.Thread(
-                    target=asyncio.run,
-                    args=(self.process_result(project, projects, lang),),
+                    target=self.process_result,
+                    args=(project, projects, lang),
                     daemon=True,
                 )
                 threads.append(_t)
@@ -136,7 +146,7 @@ class GitlabAPI():
         except Exception as e:
             logger.debug(e)
 
-    async def get_readme_content(self, project_id):
+    def get_readme_content(self, project_id):
         try:
             project = self.gl.projects.get(project_id)
             readme = project.files.get(file_path='README.md', ref='master')
@@ -145,19 +155,18 @@ class GitlabAPI():
             logger.debug("README not found")
             return "README not found or access denied."
 
-    async def get_project_info(self, project_url: str) -> dict:
+    def get_project_info(self, project_url: str) -> dict:
         project_id = project_url.split('/')[-1]
         project = self.gl.projects.get(project_id)
         return project.attributes
 
-    async def get_lincense(self, repo_url: str) -> dict:
+    def get_lincense(self, repo_url: str) -> dict:
         try:
             if not repo_url.startswith("http"):
                 repo_url = "https://" + repo_url
             print(repo_url)
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(repo_url)
-                html_content = response.text
+            response = requests.get(repo_url)
+            html_content = response.text
 
             soup = BeautifulSoup(html_content, "html.parser")
 
@@ -170,10 +179,8 @@ class GitlabAPI():
         except Exception as e:
             logger.debug(e)
 
-    # async def get_repo_languages(self):
-    #
 
-    async def get_repo_info(self, repo_url: str, lang="en"):
+    def get_repo_info(self, repo_url: str, lang="en"):
         project_path = repo_url.split(
             'gitlab.com/')[1] if 'gitlab.com/' in repo_url else repo_url
 
@@ -185,11 +192,11 @@ class GitlabAPI():
             #     print(response.json())
 
             repo_description = project.description
-            readme_content = await self.get_readme_content(project.id)
+            readme_content = self.get_readme_content(project.id)
             if readme_content == "README not found or access denied.":
                 readme_content = repo_description
 
-            summary = await summarize(
+            summary = summarize(
                 lang=lang,
                 readme_content=readme_content,
                 description=repo_description,
@@ -211,7 +218,7 @@ class GitlabAPI():
                 'forks': project.forks_count,
                 'summary': summary,
                 'contributors': [project.namespace['name']],
-                'licence': await self.get_lincense(repo_url),
+                'licence': self.get_lincense(repo_url),
                 "languages": language_list,
             }
 
@@ -221,15 +228,3 @@ class GitlabAPI():
             logger.debug("Error while fetching gitlab repo info: ", e)
             return str(e)
 
-
-# api = GitlabAPI(model="openai")
-#
-# queries = ["python"]
-#
-#
-# async def main():
-#     repos = await api.get_repo_info("https://gitlab.com/gb_python/python", "en")
-#     print(repos)
-#
-#
-# asyncio.run(main())

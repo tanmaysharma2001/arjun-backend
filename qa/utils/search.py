@@ -10,12 +10,11 @@ from qa.utils.keyword_generator import generate_keywords
 from qa.utils.query_generator import generate_queries
 from qa.utils.summarize import get_final_summary
 from qa.utils.rank import rank_repositories
-import asyncio
 import threading
 import math
 
 
-async def smart_search(lang, query, n_results, model):
+def smart_search(lang, query, n_results, model):
     github_api = GithubAPI(model=model)
     gitverse_api = GitverseAPI(model=model)
     gitlab_api = GitlabAPI(model=model)
@@ -25,15 +24,15 @@ async def smart_search(lang, query, n_results, model):
     gitee_api = GiteeAPI(model=model)
     gitflic_api = GitflicAPI(model = model)
 
-    en_queries = await generate_queries("en", query, model=model)
+    en_queries = generate_queries("en", query, model=model)
     en_queries = en_queries[:2]
-    en_keywords = await generate_keywords("en", en_queries, model=model)
+    en_keywords = generate_keywords("en", en_queries, model=model)
     en_keywords = en_keywords[:4]
 
-    ru_queries = await generate_queries("ru", query, model=model)
+    ru_queries = generate_queries("ru", query, model=model)
     ru_queries = ru_queries[:2]
 
-    ru_keywords = await generate_keywords("ru", ru_queries, model=model)
+    ru_keywords = generate_keywords("ru", ru_queries, model=model)
     ru_keywords = ru_keywords[:4]
 
     if en_queries and ru_queries and en_keywords and ru_keywords:
@@ -55,13 +54,12 @@ async def smart_search(lang, query, n_results, model):
 
         # Github
         _t = threading.Thread(
-            target=asyncio.run,
+            target=github_api.search_repositories,
             # Search in english only because github api doesn't provide good results for russian keywords
-            args=(
-                github_api.search_repositories(
+            args=
+                (
                     en_keywords[i], github_repositories, lang
                 ),
-            ),
             daemon=True,
         )
         threads.append(_t)
@@ -84,13 +82,11 @@ async def smart_search(lang, query, n_results, model):
 
         # Gitlab
         _t = threading.Thread(
-            target=asyncio.run,
+            target=gitlab_api.search_repositories,
             args=(
-                gitlab_api.search_repositories(
-                    query=en_keywords[i] if lang == "en" else ru_keywords[i],
-                    repos=gitlab_repositories,
-                    lang=lang,
-                ),
+                    en_keywords[i] if lang == "en" else ru_keywords[i],
+                    gitlab_repositories,
+                    lang,
             ),
             daemon=True,
         )
@@ -100,14 +96,12 @@ async def smart_search(lang, query, n_results, model):
 
         # Moshub
         _t = threading.Thread(
-            target=asyncio.run,
+            target=moshub_api.search_repositories,
             args=(
-                moshub_api.search_repositories(
-                    query=ru_keywords[i],
-                    repos=moshub_repositories,
-                    n_repos=5,
-                    lang=lang,
-                ),
+                    ru_keywords[i],
+                    moshub_repositories,
+                    n_results,
+                    lang,
             ),
             daemon=True,
         )
@@ -117,14 +111,12 @@ async def smart_search(lang, query, n_results, model):
 
         # Gitflame
         _t = threading.Thread(
-            target=asyncio.run,
+            target=gitflame_api.search_repositories,
             args=(
-                gitflame_api.search_repositories(
-                    query=ru_keywords[i],
-                    results=gitflame_repositories,
-                    n_repos=5,
-                    lang=lang,
-                ),
+                    ru_keywords[i],
+                    gitflame_repositories,
+                    n_results,
+                    lang,
             ),
             daemon=True,
         )
@@ -134,14 +126,12 @@ async def smart_search(lang, query, n_results, model):
 
         # LaunchPad
         _t = threading.Thread(
-            target=asyncio.run,
+            target=launchpad_api.search_repositories,
             args=(
-                launchpad_api.search_repositories(
-                    query=en_keywords[i],
-                    results=launchpad_repositories,
-                    n_repos=5,
-                    lang=lang,
-                ),
+                    en_keywords[i],
+                    launchpad_repositories,
+                    n_results,
+                    lang,
             ),
         )
 
@@ -150,14 +140,12 @@ async def smart_search(lang, query, n_results, model):
 
         # Gitee
         _t = threading.Thread(
-            target=asyncio.run,
+            target=gitee_api.search_repositories,
             args=(
-                gitee_api.search_repositories(
-                    query=en_keywords[i] if lang == "en" else ru_keywords[i],
-                    repos=gitlab_repositories,
-                    lang=lang,
-                    n_repos=1,
-                ),
+                    en_keywords[i] if lang == "en" else ru_keywords[i],
+                    gitlab_repositories,
+                    lang,
+                    1,
             ),
         )
 
@@ -166,13 +154,11 @@ async def smart_search(lang, query, n_results, model):
 
         # Gitflic
         _t = threading.Thread(
-            target=asyncio.run,
+            target=gitflic_api.search_repositories,
             args=(
-                gitflic_api.search_repositories(
-                    query=en_keywords[i],
-                    repos=gitflic_repositories,
-                    lang=lang,
-                ),
+                    en_keywords[i],
+                    gitflic_repositories,
+                    lang,
             ),
         )
 
@@ -311,7 +297,7 @@ async def smart_search(lang, query, n_results, model):
 
     if final_result:
         final_result = final_result[:10]
-        summary = await get_final_summary(
+        summary = get_final_summary(
             ranked_repositories=final_result, model=model
         )
 

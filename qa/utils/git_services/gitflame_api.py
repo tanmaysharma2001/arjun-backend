@@ -1,8 +1,5 @@
-import os
-import asyncio
 import threading
 import typing
-import httpx
 import requests
 
 from qa.utils.summarize import summarize
@@ -14,7 +11,7 @@ class GitFlameAPI():
         self.api_url = "https://gitflame.ru/api/v1/repos"
         self.model = model
 
-    async def search_repositories(self, query: str, results: list, n_repos: int, lang: str = "ru") -> list:
+    def search_repositories(self, query: str, results: list, n_repos: int, lang: str = "ru") -> list:
         try:
             repositories = requests.get(
                 url=self.get_search_url(),
@@ -30,9 +27,10 @@ class GitFlameAPI():
 
             for repo_data in repositories.json():
                 _t = threading.Thread(
-                    target=asyncio.run,
-                    args=(self.process_result(
-                        repo_data, search_results, lang),),
+                    target=self.process_result,
+                    args=(
+                        repo_data, search_results, lang
+                    ),
                     daemon=True,
                 )
                 threads.append(_t)
@@ -57,7 +55,7 @@ class GitFlameAPI():
             prefix + "ReadMe.md",
         ]
 
-    async def get_readme_content(self, readme_url: str) -> str:
+    def get_readme_content(self, readme_url: str) -> str:
         readme = requests.get(
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
@@ -66,9 +64,9 @@ class GitFlameAPI():
                      readme_url)
         return ""
 
-    async def get_languages(self, languages_url: str):
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(languages_url)
+    def get_languages(self, languages_url: str):
+
+        response = requests.get(languages_url)
         if response.status_code == 200:
             languages_data = response.json()
             total_bytes = sum(languages_data.values())
@@ -79,16 +77,14 @@ class GitFlameAPI():
     # This function is never called, as gitflame requires authentaction
     # to access the collaborators api endpoint, and I couldn't find a way to
     # do the authentication as gitflame doesn't support api keys
-    async def get_contributors(self, repo_fullname: str):
+    def get_contributors(self, repo_fullname: str):
         contributors_url = f"{self.api_url}/{repo_fullname}/collaborators"
+        response = requests.get(contributors_url)
+        print(response)
+        return [contributor["login"] for contributor in
+                response.json()] if response.status_code == 200 else "Contributors not found or access denied."
 
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(contributors_url)
-            print(response)
-            return [contributor["login"] for contributor in
-                    response.json()] if response.status_code == 200 else "Contributors not found or access denied."
-
-    async def process_result(self, data: dict, results: list, lang: str = "en") -> None:
+    def process_result(self, data: dict, results: list, lang: str = "en") -> None:
         # A repo's fullname is the name of the owner followed by a '/', then by repo's name
         repo_fullname = data["full_name"]
 
@@ -97,7 +93,7 @@ class GitFlameAPI():
         repo_owner = data["owner"]["username"]
         repo_forks = data["forks_count"]
         repo_stars = data["stars_count"]
-        repo_languages = await self.get_languages(data["languages_url"])
+        repo_languages = self.get_languages(data["languages_url"])
         # repo_contributors = await self.get_contributors(repo_fullname)
         repo_contributors = "N/A"
 
@@ -109,7 +105,7 @@ class GitFlameAPI():
             "descriptoin", "There is no description for this repo")
 
         for possible_readme_url in self.get_readme_urls(owner=repo_owner, repo_name=repo_name):
-            repo_readme_content = await self.get_readme_content(possible_readme_url)
+            repo_readme_content = self.get_readme_content(possible_readme_url)
             if repo_readme_content != "":
                 data["readme_content"] = repo_readme_content
                 break
@@ -117,7 +113,7 @@ class GitFlameAPI():
         repo_readme_content = data.get(
             "readme_content", "There is no README for this repo")
 
-        summary = await summarize(lang, repo_readme_content, repo_description, self.model)
+        summary = summarize(lang, repo_readme_content, repo_description, self.model)
 
         results.append(
             {
@@ -136,18 +132,18 @@ class GitFlameAPI():
             }
         )
 
-    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
+    def get_repo_info(self, repo_url: str, lang: str) -> dict:
         repo_name = repo_url.split("/")[4]
         repo_owner = repo_url.split("/")[3]
         repo_description = ""
         readme_content = ""
         for possible_readme_url in self.get_readme_urls(repo_name=repo_name, owner=repo_owner):
-            repo_readme_content = await self.get_readme_content(possible_readme_url)
+            repo_readme_content = self.get_readme_content(possible_readme_url)
             if repo_readme_content != "":
                 readme_content = repo_readme_content
                 break
 
-        summary = await summarize(lang, readme_content, repo_description, self.model)
+        summary = summarize(lang, readme_content, repo_description, self.model)
 
         info = {
             "name": repo_name,

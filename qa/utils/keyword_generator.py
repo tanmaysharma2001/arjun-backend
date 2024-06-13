@@ -1,18 +1,17 @@
 import os
 import json
 import openai
-from openai import AsyncOpenAI
+from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 from .prompts import KEYWORD_GENERATOR_PROMPT
 import threading
-import asyncio
 
 load_dotenv(find_dotenv())
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
-async def generate_keyword(client, model_name, lang, query, keyword_list):
-    response = await client.chat.completions.create(
+def generate_keyword(client, model_name, lang, query, keyword_list):
+    response = client.chat.completions.create(
         model=model_name,
         response_format={"type": "json_object"},
         messages=[
@@ -31,22 +30,22 @@ async def generate_keyword(client, model_name, lang, query, keyword_list):
     keyword_list.extend(keywords["keywords"])
 
 
-async def generate_keywords(lang, queries, model):
+def generate_keywords(lang, queries, model):
     print(f"Generating keywords for ({lang})")
 
     if model == "openai":
-        client = AsyncOpenAI(timeout=10)
+        client = OpenAI(timeout=10)
         model_name = "gpt-4-1106-preview"
     else:
-        client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
+        client = OpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
         model_name = model
 
     keyword_list = []
     threads = []
     for query in queries:
         t = threading.Thread(
-            target=asyncio.run,
-            args=(generate_keyword(client, model_name, lang, query, keyword_list),)
+            target=generate_keyword,
+            args=(client, model_name, lang, query, keyword_list)
         )
         t.start()
         threads.append(t)

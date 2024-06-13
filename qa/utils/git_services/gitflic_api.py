@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-import httpx
 from qa.utils.summarize import summarize
 from dotenv import load_dotenv, find_dotenv
 import os
@@ -14,24 +13,24 @@ class GitflicAPI():
         self.model = model
 
 
-    async def search_repositories(self, query: str, repos: list, lang: str = "en"):
+    def search_repositories(self, query: str, repos: list, lang: str = "en"):
         url = f"https://gitflic.ru/search?q={query}"
         results = []
         try:
-            response =  requests.get(url)
+            response = requests.get(url)
             soup = BeautifulSoup(response.content, "html.parser")
             elements = soup.find_all(class_='py-4', recursive=True)
             for element in elements:
                 link = element.find('a')
                 url = "https://gitflic.ru" + link['href']
-                info = await self.get_repo_info(url, lang)
+                info = self.get_repo_info(url, lang)
                 results.append(info)
         except Exception as e:
             pass
 
         repos.extend(results)
 
-    async def scrape_info(self, gitflic_repo_url: str) -> dict:
+    def scrape_info(self, gitflic_repo_url: str) -> dict:
 
         info = {}
         try:
@@ -52,7 +51,7 @@ class GitflicAPI():
 
                 info["stars"] = int(forks_element[6].text.strip().split('\n')[0])
 
-                info["readme_content"] = await self.get_readme_content(gitflic_repo_url)
+                info["readme_content"] = self.get_readme_content(gitflic_repo_url)
                 info['license'] = ""
                 info['contributors'] = [gitflic_repo_url.split('/')[4]]
 
@@ -74,7 +73,7 @@ class GitflicAPI():
 
         return info
 
-    async def get_readme_content(self, gitflic_repo_url: str) -> str:
+    def get_readme_content(self, gitflic_repo_url: str) -> str:
         readme_content = ""
         try:
             response = requests.get(gitflic_repo_url + "#readme")
@@ -83,7 +82,7 @@ class GitflicAPI():
             pass
         return readme_content
 
-    async def extract_repo_url(self, file_url: str) -> str:
+    def extract_repo_url(self, file_url: str) -> str:
         # Split the URL into parts
         parts = file_url.split("/")
         # Check if the URL is valid and contains enough parts to extract the repo URL
@@ -94,21 +93,21 @@ class GitflicAPI():
         else:
             return None
 
-    async def process_result(
+    def process_result(
         self, yandex_search_result: dict, results: list, lang: str = "ru"
     ) -> None:
-        repo_url = await self.extract_repo_url(yandex_search_result["url"])
+        repo_url = self.extract_repo_url(yandex_search_result["url"])
 
         if repo_url is not None:
             try:
-                repo_info = await self.scrape_info(repo_url)
+                repo_info = self.scrape_info(repo_url)
                 repo_name = repo_info["name"]
                 forks = repo_info["forks"]
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
                 description = yandex_search_result.get("headline")
                 contributors = repo_info.get("contributors", [])
-                summary = await summarize(lang, readme_content, description, model=self.model)
+                summary = summarize(lang, readme_content, description, model=self.model)
                 results.append(
                     {
                         "name": repo_name,
@@ -128,19 +127,19 @@ class GitflicAPI():
             except Exception as e:
                 pass
 
-    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
-        data = await self.scrape_info(repo_url)
+    def get_repo_info(self, repo_url: str, lang: str) -> dict:
+        data = self.scrape_info(repo_url)
         repo_license = data['license']
         repo_name = data["name"]
         repo_forks = data["forks"]
         repo_stars = data["stars"]
         repo_contributors = data['contributors']
         repo_description = data["description"]
-        repo_readme_content = await self.get_readme_content(repo_url)
+        repo_readme_content = self.get_readme_content(repo_url)
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
 
-        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
+        summary = summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         info = {
             "name": repo_name,

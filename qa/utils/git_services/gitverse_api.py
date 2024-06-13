@@ -6,6 +6,9 @@ import threading
 from qa.utils.summarize import summarize
 from dotenv import load_dotenv, find_dotenv
 import os
+import requests
+
+from utils.logger import logger
 
 
 class GitverseAPI():
@@ -16,53 +19,50 @@ class GitverseAPI():
         self.model = model
 
 
-    async def search_repositories(self, query: str, repos: list, lang: str = "en"):
+    def search_repositories(self, query: str, repos: list, lang: str = "en"):
         url = "https://yandex.ru/search/xml"
         params = {
             "folderid": self.yc_folder,
             "apikey": self.yc_secret_key,
         }
         results = []
-        async with httpx.AsyncClient(timeout=10) as client:
-            params["query"] = query + " host:gitverse.ru"
-            response = await client.get(url, params=params)
-            data_dict = xmltodict.parse(response.text)
-            try:
-                _res = data_dict["yandexsearch"]["response"]["results"]["grouping"][
-                    "group"
-                ]["doc"]
-            except KeyError:
-                print(data_dict)
-                _res = []
-            except TypeError:
-                _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
 
-            threads = []
+        params["query"] = query + " host:gitverse.ru"
+        response = requests.get(url, params=params)
+        data_dict = xmltodict.parse(response.text)
+        try:
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]["doc"]
+        except KeyError:
+            print(data_dict)
+            _res = []
+        except TypeError:
+            _res = data_dict["yandexsearch"]["response"]["results"]["grouping"]["group"]
 
-            for result in _res:
-                if "doc" in result.keys():
-                    result = result["doc"]
-                _t = threading.Thread(
-                    target=asyncio.run,
-                    args=(self.process_result(result, results, lang),),
-                    daemon=True,
-                )
-                threads.append(_t)
-                _t.start()
-            for thread in threads:
-                thread.join()
+        threads = []
+
+        for result in _res:
+            if "doc" in result.keys():
+                result = result["doc"]
+            _t = threading.Thread(
+                target=self.process_result,
+                args=(result, results, lang),
+                daemon=True,
+            )
+            threads.append(_t)
+            _t.start()
+        for thread in threads:
+            thread.join()
 
         repos.extend(results)
 
-    async def scrape_info(self, gitverse_repo_url: str) -> dict:
+    def scrape_info(self, gitverse_repo_url: str) -> dict:
 
         info = {}
 
         print(f"Scraping {gitverse_repo_url}")
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(gitverse_repo_url)
-                html_content = response.text
+            response = requests.get(gitverse_repo_url)
+            html_content = response.text
 
             soup = BeautifulSoup(html_content, "html.parser")
 
@@ -81,7 +81,7 @@ class GitverseAPI():
 
             info["stars"] = stars
 
-            info["readme_content"] = await self.get_readme_content(gitverse_repo_url)
+            info["readme_content"] = self.get_readme_content(gitverse_repo_url)
             info['license'] = ""
             info['contributors'] = [gitverse_repo_url.split('/')[3]]
 
@@ -102,7 +102,7 @@ class GitverseAPI():
 
         return info
 
-    async def get_readme_content(self, gitverse_repo_url: str) -> str:
+    def get_readme_content(self, gitverse_repo_url: str) -> str:
 
         gitverse_repo_full_name = (
             gitverse_repo_url.split(
@@ -114,15 +114,14 @@ class GitverseAPI():
         for branch in possible_branch_names:
             for md_variation in md_variations:
                 gitverse_repo_readme_url = f"https://gitverse.ru/api/repos/{gitverse_repo_full_name}/raw/branch/{branch}/README.{md_variation}"
-                async with httpx.AsyncClient() as client:
-                    response = await client.get(gitverse_repo_readme_url)
+                response = requests.get(gitverse_repo_readme_url)
                 if response.status_code == 400:
                     continue
                 readme_content = response.text
 
         return readme_content
 
-    async def extract_repo_url(self, file_url: str) -> str:
+    def extract_repo_url(self, file_url: str) -> str:
         # Split the URL into parts
         parts = file_url.split("/")
         # Check if the URL is valid and contains enough parts to extract the repo URL
@@ -133,21 +132,21 @@ class GitverseAPI():
         else:
             return None
 
-    async def process_result(
+    def process_result(
         self, yandex_search_result: dict, results: list, lang: str = "ru"
     ) -> None:
-        repo_url = await self.extract_repo_url(yandex_search_result["url"])
+        repo_url = self.extract_repo_url(yandex_search_result["url"])
 
         if repo_url is not None:
             try:
-                repo_info = await self.scrape_info(repo_url)
+                repo_info = self.scrape_info(repo_url)
                 repo_name = repo_info["name"]
                 forks = repo_info["forks"]
                 stars = repo_info["stars"]
                 readme_content = repo_info["readme_content"]
                 description = yandex_search_result.get("headline")
                 contributors = repo_info.get("contributors", [])
-                summary = await summarize(lang, readme_content, description, model=self.model)
+                summary = summarize(lang, readme_content, description, model=self.model)
                 results.append(
                     {
                         "name": repo_name,
@@ -165,19 +164,19 @@ class GitverseAPI():
             except Exception as e:
                 logger.debug(f"Error occurred while scraping {repo_url}. Details:", e)
 
-    async def get_repo_info(self, repo_url: str, lang: str) -> dict:
-        data = await self.scrape_info(repo_url)
+    def get_repo_info(self, repo_url: str, lang: str) -> dict:
+        data = self.scrape_info(repo_url)
         repo_license = data['license']
         repo_name = data["name"]
         repo_forks = data["forks"]
         repo_stars = data["stars"]
         repo_contributors = data['contributors']
         repo_description = data["description"]
-        repo_readme_content = await self.get_readme_content(repo_url)
+        repo_readme_content = self.get_readme_content(repo_url)
         if repo_readme_content == "README not found or access denied.":
             repo_readme_content = "There is no README for this repo"
 
-        summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
+        summary = summarize(lang, repo_readme_content, repo_description, model=self.model)
 
         info = {
             "name": repo_name,
