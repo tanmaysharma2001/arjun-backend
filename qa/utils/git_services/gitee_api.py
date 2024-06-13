@@ -8,6 +8,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 import asyncio
 
+from utils.logger import logger
+
 
 class GiteeAPI:
     def __init__(self, model="openai"):
@@ -49,7 +51,8 @@ class GiteeAPI:
                 if readme_box:
                     readme_content = readme_box.get_text(strip=True)
             except Exception as e:
-                print("Error fetching README:", e)
+                # print("Error fetching README:", e)
+                logger.debug("Error fetching README:", e)
 
         try:
             page_source = self.driver.page_source
@@ -69,7 +72,7 @@ class GiteeAPI:
                         {"language": lang_name, "percentage": lang_percentage}
                     )
         except Exception as e:
-            print("Error fetching languages:", e)
+            logger.debug("Error fetching languages:", e)
 
         try:
             stars_elem = soup.find("span", class_="repo-stars")
@@ -79,7 +82,7 @@ class GiteeAPI:
             if forks_elem:
                 forks = int(forks_elem.get_text(strip=True).replace(",", ""))
         except Exception as e:
-            print("Error fetching stars and forks:", e)
+            logger.debug("Error fetching stars and forks:", e)
 
         return readme_content, languages, stars, forks
 
@@ -149,20 +152,3 @@ class GiteeAPI:
 
     def close(self):
         self.driver.quit()
-
-
-# async def main():
-#     api = GiteeAPI()  # Use "openai" to fetch README content
-
-#     repo_info = await api.get_repo_info("https://gitee.com/fasiondog/hikyuu", "en")
-#     print("Specific Repository Info:", repo_info)
-
-#     repositories = []
-#     await api.search_repositories("c++", repositories, n_repos=2)
-#     for repo in repositories:
-#         print("Repository Info:", repo)
-
-#     api.close()
-
-# if __name__ == "__main__":
-#     asyncio.run(main())

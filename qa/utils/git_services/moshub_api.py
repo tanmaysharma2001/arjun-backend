@@ -47,7 +47,7 @@ class MoshubAPI():
             repos.extend(search_results)
 
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.debug(f"An error occurred: {e}")
             return []
 
     async def scrape_info(self, repo_url) -> dict:

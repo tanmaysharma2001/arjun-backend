@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 import os
 import requests
 
+from utils.logger import logger
+
 
 class GitlabAPI():
 
@@ -108,28 +110,31 @@ class GitlabAPI():
         })
 
     async def search_repositories(self, query, repos: list, lang: str = "en"):
-        per_page = 5
-        page = 1
-        search_results = self.gl.search(
-            scope=gitlab.const.SearchScope.PROJECTS,
-            search=query,
-            page=page,
-            per_page=per_page)
+        try:
+            per_page = 5
+            page = 1
+            search_results = self.gl.search(
+                scope=gitlab.const.SearchScope.PROJECTS,
+                search=query,
+                page=page,
+                per_page=per_page)
 
-        threads = []
-        projects = []
-        for project in search_results:
-            _t = threading.Thread(
-                target=asyncio.run,
-                args=(self.process_result(project, projects, lang),),
-                daemon=True,
-            )
-            threads.append(_t)
-            _t.start()
-        for thread in threads:
-            thread.join()
+            threads = []
+            projects = []
+            for project in search_results:
+                _t = threading.Thread(
+                    target=asyncio.run,
+                    args=(self.process_result(project, projects, lang),),
+                    daemon=True,
+                )
+                threads.append(_t)
+                _t.start()
+            for thread in threads:
+                thread.join()
 
-        repos.extend(projects)
+            repos.extend(projects)
+        except Exception as e:
+            logger.debug(e)
 
     async def get_readme_content(self, project_id):
         try:
@@ -137,6 +142,7 @@ class GitlabAPI():
             readme = project.files.get(file_path='README.md', ref='master')
             return readme.decode()
         except Exception:
+            logger.debug("README not found")
             return "README not found or access denied."
 
     async def get_project_info(self, project_url: str) -> dict:
@@ -162,7 +168,7 @@ class GitlabAPI():
             return None
 
         except Exception as e:
-            raise e
+            logger.debug(e)
 
     # async def get_repo_languages(self):
     #
@@ -212,7 +218,7 @@ class GitlabAPI():
             return info
 
         except Exception as e:
-            print("Error while fetching gitlab repo info: ", e)
+            logger.debug("Error while fetching gitlab repo info: ", e)
             return str(e)
 
 

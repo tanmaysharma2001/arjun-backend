@@ -6,6 +6,7 @@ import httpx
 import requests
 
 from qa.utils.summarize import summarize
+from utils.logger import logger
 
 
 class GitFlameAPI():
@@ -43,7 +44,7 @@ class GitFlameAPI():
             results.extend(search_results)
 
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.debug(f"An error occurred: {e}")
             return []
 
     def get_search_url(self) -> str:
@@ -62,7 +63,7 @@ class GitFlameAPI():
             url=readme_url)
         if readme.status_code == 200 and not readme.content.decode().startswith("<!DOCTYPE html>"):
             return readme.content.decode()
-        print(f"Can not find readme.md for gitflame for this link: {
+        logger.debug(f"Can not find readme.md for gitflame for this link: {
               readme_url}")
         return ""
 

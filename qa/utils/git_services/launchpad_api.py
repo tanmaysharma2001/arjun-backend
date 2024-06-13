@@ -4,6 +4,8 @@ import threading
 from bs4 import BeautifulSoup
 import requests
 
+from utils.logger import logger
+
 
 class LaunchPadAPI():
 
@@ -110,8 +112,8 @@ class LaunchPadAPI():
 
             repositories.append(repo)
         except Exception as e:
-            print("from get_repo_info_launchpad")
-            print(e)
+            logger.debug("from get_repo_info_launchpad")
+            logger.debug(e)
 
     async def search_repositories(self, query, results: list, n_repos: int, lang: str = "en"):
         try:
@@ -146,5 +148,5 @@ class LaunchPadAPI():
 
             results.extend(repositories)
         except Exception as e:
-            print("from search_repo_launchpad")
-            print(e)
+            logger.debug("from search_repo_launchpad")
+            logger.debug(e)

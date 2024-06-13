@@ -5,6 +5,8 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import requests
 
+from utils.logger import logger
+
 
 class GitflicAPI():
     def __init__(self, model:str = "openai"):
@@ -28,7 +30,7 @@ class GitflicAPI():
                 info = await self.get_repo_info(url, lang)
                 results.append(info)
         except Exception as e:
-            print(e)
+            logger.debug(e)
 
         repos.extend(results)
 
@@ -69,7 +71,7 @@ class GitflicAPI():
             info["technologies"] = [{"name" : k, "percent" : (1 / len(techs)) * 100} for k in techs]
 
         except Exception as e:
-            raise e
+            logger.debug('exception from scrape info', e)
 
         return info
 
@@ -124,7 +126,7 @@ class GitflicAPI():
                     }
                 )
             except Exception as e:
-                print(f"Error occurred while scraping {repo_url}. Details:", e)
+                logger.debug(f"Error occurred while scraping {repo_url}. Details:", e)
 
     async def get_repo_info(self, repo_url: str, lang: str) -> dict:
         data = await self.scrape_info(repo_url)

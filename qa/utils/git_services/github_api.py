@@ -83,7 +83,7 @@ class GithubAPI:
             for thread in threads:
                 thread.join()
         except Exception as e:
-            print(f"Error occurred: {e}")
+            logger.debug(f"Error occurred: {e}")
 
     async def get_readme_content(self, full_name):
         """Retrieve the README content for a given repository."""

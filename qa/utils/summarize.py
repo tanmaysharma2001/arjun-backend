@@ -36,7 +36,8 @@ async def summarize(lang, readme_content, description, model):
         )
 
         summary = json.loads(response.choices[0].message.content)
-        return summary["summary"]
+        if summary["summary"]:
+            return summary["summary"]
 
     else:
         client = AsyncOpenAI(base_url = 'https://ai.pptx704.com',api_key='ollama',timeout=120)
@@ -85,8 +86,9 @@ async def get_final_summary(ranked_repositories, model):
         )
 
         summary = json.loads(response.choices[0].message.content)
-        return summary["summary"]
-    
+        if summary["summary"]:
+            return summary["summary"]
+
     else:
 
 

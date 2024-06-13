@@ -98,7 +98,7 @@ class GitverseAPI():
                 info["description"] = ""
 
         except Exception as e:
-            raise e
+            logger.debug(e)
 
         return info
 
@@ -163,7 +163,7 @@ class GitverseAPI():
                     }
                 )
             except Exception as e:
-                print(f"Error occurred while scraping {repo_url}. Details:", e)
+                logger.debug(f"Error occurred while scraping {repo_url}. Details:", e)
 
     async def get_repo_info(self, repo_url: str, lang: str) -> dict:
         data = await self.scrape_info(repo_url)
