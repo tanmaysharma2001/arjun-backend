@@ -41,6 +41,7 @@ async def smart_search(lang, query, n_results, model):
 
     github_repositories = []
     gitverse_repositories = []
+    gitflic_repositories = []
     gitlab_repositories = []
     moshub_repositories = []
     gitflame_repositories = []
