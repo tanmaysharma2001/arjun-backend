@@ -5,8 +5,6 @@ from dotenv import load_dotenv, find_dotenv
 import os
 import requests
 
-from utils.logger import logger
-
 
 class GitflicAPI():
     def __init__(self, model:str = "openai"):
@@ -19,10 +17,9 @@ class GitflicAPI():
     async def search_repositories(self, query: str, repos: list, lang: str = "en"):
         url = f"https://gitflic.ru/search?q={query}"
         results = []
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
         try:
+            response =  requests.get(url)
+            soup = BeautifulSoup(response.content, "html.parser")
             elements = soup.find_all(class_='py-4', recursive=True)
             for element in elements:
                 link = element.find('a')
@@ -30,58 +27,60 @@ class GitflicAPI():
                 info = await self.get_repo_info(url, lang)
                 results.append(info)
         except Exception as e:
-            logger.debug(e)
+            pass
 
         repos.extend(results)
 
     async def scrape_info(self, gitflic_repo_url: str) -> dict:
 
         info = {}
-
-        print(f"Scraping {gitflic_repo_url}")
         try:
-            async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(gitflic_repo_url)
-                html_content = response.text
+    
+            response = requests.get(gitflic_repo_url)
+            html_content = response.text
 
-            soup = BeautifulSoup(html_content, "html.parser")
+            try:
+                soup = BeautifulSoup(html_content, "html.parser")
 
             # Get name
-            info["name"] = gitflic_repo_url.split('/')[5]
+                info["name"] = gitflic_repo_url.split('/')[5]
 
             # Get forks
-            forks_element = soup.find_all(class_="text-muted")
-            info["forks"] = int(forks_element[5].text.strip().split('\n')[0])
+                forks_element = soup.find_all(class_="text-muted")
+                info["forks"] = int(forks_element[5].text.strip().split('\n')[0])
 
 
-            info["stars"] = int(forks_element[6].text.strip().split('\n')[0])
+                info["stars"] = int(forks_element[6].text.strip().split('\n')[0])
 
-            info["readme_content"] = await self.get_readme_content(gitflic_repo_url)
-            info['license'] = ""
-            info['contributors'] = [gitflic_repo_url.split('/')[4]]
+                info["readme_content"] = await self.get_readme_content(gitflic_repo_url)
+                info['license'] = ""
+                info['contributors'] = [gitflic_repo_url.split('/')[4]]
 
-            h4_tag = soup.find('p', class_='project__project-desc-text')
+                h4_tag = soup.find('p', class_='project__project-desc-text')
 
-            if h4_tag:
-                info["description"] = h4_tag.text
-            else:
-                info["description"] = ""
+                if h4_tag:
+                    info["description"] = h4_tag.text
+                else:
+                    info["description"] = ""
 
-            techs =  [forks_element[3].text.strip().split('\n')[0]]
-            info["technologies"] = [{"name" : k, "percent" : (1 / len(techs)) * 100} for k in techs]
+                techs =  [forks_element[3].text.strip().split('\n')[0]]
+                info["technologies"] = [{"name" : k, "percent" : (1 / len(techs)) * 100} for k in techs]
+                info["languages"] = {f"{techs[0]}": 100}
+            except Exception as e:
+                pass
 
         except Exception as e:
-            logger.debug('exception from scrape info', e)
+            pass
 
         return info
 
     async def get_readme_content(self, gitflic_repo_url: str) -> str:
         readme_content = ""
-
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(gitflic_repo_url + "#readme")
+        try:
+            response = requests.get(gitflic_repo_url + "#readme")
             readme_content = response.text
-
+        except Exception as e:
+            pass
         return readme_content
 
     async def extract_repo_url(self, file_url: str) -> str:
@@ -123,10 +122,11 @@ class GitflicAPI():
                         'contributors': contributors,
                         "summary": summary,
                         "technologies": repo_info["technologies"],
+                        "languages": repo_info["languages"],
                     }
                 )
             except Exception as e:
-                logger.debug(f"Error occurred while scraping {repo_url}. Details:", e)
+                pass
 
     async def get_repo_info(self, repo_url: str, lang: str) -> dict:
         data = await self.scrape_info(repo_url)
@@ -152,5 +152,6 @@ class GitflicAPI():
             "summary": summary,
             "contributors" : repo_contributors,
             "technologies" : data["technologies"],
+            "languages" : data["languages"]
         }
         return info

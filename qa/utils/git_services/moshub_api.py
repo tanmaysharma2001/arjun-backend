@@ -75,6 +75,7 @@ class MoshubAPI():
 
         tools = soup.find_all('div', class_= 'progress-bar')
         technologies = []
+        languages = {}
         for tool in tools:
             #name =  tool.tile('span', class_ = 'repository-language-bar-tooltip-language')
             #percent = tool.find('span', class_ = 'repository-language-bar-tooltip-share')
@@ -82,7 +83,9 @@ class MoshubAPI():
             tool = splitted[1].split('<')[0]
             percentage = splitted[3].split('<')[0]
             technologies.append({"name": tool, "percent": percentage})
+            languages[tool] = percentage
         info["technologies"] = technologies
+        info['languages'] = languages
 
         return info
 
@@ -132,6 +135,7 @@ class MoshubAPI():
         technologies = info.get("technologies", [])
         contributors = info.get("contributors", [])
         license = info.get("license", None)
+        langauges = info.get("languages", {})
 
         summary = await summarize(lang, repo_readme_content, repo_description, model=self.model)
 
@@ -148,7 +152,8 @@ class MoshubAPI():
                 "summary": summary,
                 "technologies": technologies,
                 "contributors": contributors,
-                "licence": license
+                "licence": license,
+                "languages" : langauges
             }
         )
 
@@ -171,6 +176,7 @@ class MoshubAPI():
             "contributors": contributors,
             "licence": scraped_info["license"],
             "technologies": scraped_info["technologies"],
+            "languages": scraped_info["languages"]
         }
 
         return info
